@@ -1,244 +1,117 @@
 import React from 'react';
+import { Heart, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Star, Zap, Crown, Eye, X } from 'lucide-react';
+import FlavorBadge from './IndicadorSabor';
+import DietaryIcons from './IconosDieta';
 
-interface ProductCardProps {
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  console?: string;
-  isNew?: boolean;
-  isOnSale?: boolean;
-  onAddToCart?: () => void;
-  productId?: string;
-  viewMode?: 'grid' | 'list';
-  inStock?: boolean;
-  stockCount?: number;
-}
+type Product = {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  precio: number;
+  precio_original?: number;
+  perfil_sabor?: string[];
+  info_dietetica?: Record<string, boolean>;
+  es_temporal?: boolean;
+  image_urls?: string[];
+  rating?: number;
+  review_count?: number;
+  is_on_sale?: boolean;
+  is_new?: boolean;
+  in_stock?: boolean;
+  likes_count?: number;
+};
 
-const ProductCard = ({ 
-  name, 
-  price, 
-  originalPrice, 
-  image, 
-  console: gameConsole, 
-  isNew, 
-  isOnSale,
-  onAddToCart,
-  productId,
-  viewMode = 'grid',
-  inStock = true,
-  stockCount = 0
-}: ProductCardProps) => {
+type ProductCardProps = {
+  product: Product;
+  onLike?: (id: string) => void;
+  compact?: boolean;
+};
+
+const ProductCard = ({ product, onLike, compact = false }: ProductCardProps) => {
   const navigate = useNavigate();
 
-  const handleViewDetails = () => {
-    if (productId) {
-      navigate(`/products?productId=${productId}`);
-    }
-  };
+  const image = product.image_urls?.[0] || '/placeholder.svg';
+  const discount = product.precio_original
+    ? Math.round((1 - product.precio / product.precio_original) * 100)
+    : 0;
 
-  if (viewMode === 'list') {
-    return (
-      <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-[#3bc8da]/50 flex">
-        {/* Image (square) */}
-        <div className="relative w-48 aspect-square overflow-hidden flex-shrink-0">
-          <img 
-            src={image} 
-            alt={name}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {isNew && (
-              <div className="flex items-center gap-1 bg-gradient-to-r from-[#3fdb70] to-[#3bc8da] text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                <Zap className="w-3 h-3" />
-                NUEVO
-              </div>
-            )}
-            {isOnSale && (
-              <div className="flex items-center gap-1 bg-gradient-to-r from-[#d93d34] to-[#f3cb49] text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
-                <Star className="w-3 h-3" />
-                OFERTA
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Content - stack with CTA at bottom */}
-        <div className="flex-1 p-4 flex flex-col">
-          <h3 className="text-[#091024] font-bold text-lg mb-1 group-hover:text-[#3bc8da] transition-colors cursor-pointer" onClick={handleViewDetails}>
-            {name}
-          </h3>
-          {gameConsole && (
-            <div className="flex items-center gap-1 mb-2">
-              <Crown className="w-4 h-4 text-[#f3cb49]" />
-              <p className="text-sm text-[#3bc8da] font-bold">{gameConsole}</p>
-            </div>
-          )}
-
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-black text-[#091024] group-hover:text-[#3bc8da] transition-colors">
-              ${price.toFixed(2)}
-            </span>
-            {originalPrice && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500 line-through">
-                  ${originalPrice.toFixed(2)}
-                </span>
-                <span className="text-xs text-[#d93d34] font-bold">
-                  -{Math.round(((originalPrice - price) / originalPrice) * 100)}%
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Low stock indicator above button */}
-          {stockCount !== undefined && stockCount > 0 && stockCount <= 5 && inStock && (
-            <p className="text-xs text-orange-500 font-semibold mt-2">
-              ¡Solo quedan {stockCount} unidades!
-            </p>
-          )}
-
-          {/* Spacer */}
-          <div className="flex-1" />
-
-          {/* Add to Cart Button - last element */}
-          <button
-            onClick={onAddToCart}
-            disabled={!inStock || stockCount === 0}
-            className={`${
-              !inStock || stockCount === 0 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-[#3bc8da] to-[#3fdb70] hover:from-[#3fdb70] hover:to-[#3bc8da]'
-            } text-white py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 ${
-              inStock && stockCount > 0 ? 'transform hover:scale-105' : ''
-            } shadow-lg self-start sm:self-end`}
-          >
-            {!inStock || stockCount === 0 ? (
-              <>
-                <X className="w-5 h-5" />
-                <span>Agotado</span>
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-5 h-5" />
-                <span>Agregar</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Grid view
   return (
-    <div className="group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-[#3bc8da]/50 h-full flex flex-col">
-      {/* Image Container with Overlay Effects (square) */}
-      <div className="relative overflow-hidden aspect-square w-full">
-        <img 
-          src={image} 
-          alt={name}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
-          onClick={handleViewDetails}
+    <div
+      onClick={() => navigate(`/products/${product.id}`)}
+      className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300 cursor-pointer"
+    >
+      {/* Image */}
+      <div className="relative aspect-square overflow-hidden bg-muted">
+        <img
+          src={image}
+          alt={product.nombre}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        {/* View Details Button */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button
-            onClick={handleViewDetails}
-            className="bg-white/90 text-[#091024] px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold transform scale-75 group-hover:scale-100 transition-transform duration-300 flex items-center gap-2"
-          >
-            <Eye className="w-4 h-4" />
-            Ver Detalles
-          </button>
-        </div>
-        {/* Enhanced Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-2">
-          {isNew && (
-            <div className="flex items-center gap-1 bg-gradient-to-r from-[#3fdb70] to-[#3bc8da] text-white px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-lg">
-              <Zap className="w-3 h-3" />
-              NUEVO
-            </div>
+        {/* Badges */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {product.es_temporal && (
+            <span className="bg-sorbe-strawberry text-white text-xs px-2 py-0.5 rounded-full font-medium">Temporal</span>
           )}
-          {isOnSale && (
-            <div className="flex items-center gap-1 bg-gradient-to-r from-[#d93d34] to-[#f3cb49] text-white px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-lg animate-pulse">
-              <Star className="w-3 h-3" />
-              OFERTA
-            </div>
+          {product.is_new && (
+            <span className="bg-sorbe-mint text-sorbe-chocolate text-xs px-2 py-0.5 rounded-full font-medium">Nuevo</span>
+          )}
+          {discount > 0 && (
+            <span className="bg-sorbe-raspberry text-white text-xs px-2 py-0.5 rounded-full font-medium">-{discount}%</span>
           )}
         </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-3 sm:p-5 flex flex-col gap-3 flex-1">
-        <h3 className="text-[#091024] font-bold text-sm sm:text-base line-clamp-2 min-h-[2.25rem] sm:min-h-[3rem] group-hover:text-[#3bc8da] transition-colors cursor-pointer" onClick={handleViewDetails}>
-          {name}
-        </h3>
-        {gameConsole && (
-          <p className="text-xs sm:text-sm text-[#3bc8da] font-semibold -mt-2">{gameConsole}</p>
-        )}
-        {/* Price Section compact */}
-        <div className="flex items-end justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xl sm:text-2xl font-black text-[#091024] group-hover:text-[#3bc8da] transition-colors">
-              ${price.toFixed(2)}
-            </span>
-            {originalPrice && (
-              <div className="flex flex-col leading-tight">
-                <span className="text-xs sm:text-sm text-gray-500 line-through">
-                  ${originalPrice.toFixed(2)}
-                </span>
-                <span className="text-[10px] sm:text-xs text-[#d93d34] font-bold">
-                  -{Math.round(((originalPrice - price) / originalPrice) * 100)}%
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Stock indicator above button */}
-        {stockCount !== undefined && stockCount > 0 && stockCount <= 5 && inStock && (
-          <p className="text-[11px] sm:text-xs text-orange-500 mt-1.5 text-center font-semibold">
-            ¡Solo quedan {stockCount} unidades!
-          </p>
-        )}
-
-        {/* Spacer to push button to bottom */}
-        <div className="flex-1" />
-
-        {/* Add to Cart Button - last element */}
+        {/* Like button */}
         <button
-          onClick={onAddToCart}
-          disabled={!inStock || stockCount === 0}
-          className={`w-full ${
-            !inStock || stockCount === 0 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-gradient-to-r from-[#3bc8da] to-[#3fdb70] hover:from-[#3fdb70] hover:to-[#3bc8da]'
-          } text-white py-2 sm:py-3 px-4 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 transform ${
-            inStock && stockCount > 0 ? 'hover:scale-105' : ''
-          } shadow-lg group-hover:shadow-xl`}
+          onClick={(e) => { e.stopPropagation(); onLike?.(product.id); }}
+          className="absolute top-2 right-2 p-1.5 bg-white/80 hover:bg-white rounded-full transition-colors"
         >
-          {!inStock || stockCount === 0 ? (
-            <>
-              <X className="w-5 h-5" />
-              <span>Agotado</span>
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="w-5 h-5" />
-              <span>Agregar</span>
-            </>
-          )}
+          <Heart className="w-4 h-4 text-sorbe-strawberry" fill={product.likes_count && product.likes_count > 0 ? 'currentColor' : 'none'} />
         </button>
       </div>
 
-      {/* Corner Accent */}
-      <div className="absolute top-0 right-0 w-0 h-0 border-l-[16px] sm:border-l-[20px] border-l-transparent border-t-[16px] sm:border-t-[20px] border-t-[#f3cb49] opacity-60"></div>
+      {/* Content */}
+      <div className={`p-3 sm:p-4 ${compact ? 'space-y-1' : 'space-y-2'}`}>
+        {/* Flavor badges */}
+        {product.perfil_sabor && product.perfil_sabor.length > 0 && (
+          <div className="flex gap-1 flex-wrap">
+            {product.perfil_sabor.map((f) => (
+              <FlavorBadge key={f} flavor={f} size="sm" />
+            ))}
+          </div>
+        )}
+
+        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 text-sm sm:text-base">
+          {product.nombre}
+        </h3>
+
+        {/* Dietary info */}
+        {product.info_dietetica && (
+          <DietaryIcons info={product.info_dietetica} size="sm" />
+        )}
+
+        {/* Rating */}
+        {product.rating && product.rating > 0 && (
+          <div className="flex items-center gap-1">
+            <Star className="w-3.5 h-3.5 text-sorbe-lemon" fill="currentColor" />
+            <span className="text-xs font-medium">{product.rating.toFixed(1)}</span>
+            {product.review_count && product.review_count > 0 && (
+              <span className="text-xs text-muted-foreground">({product.review_count})</span>
+            )}
+          </div>
+        )}
+
+        {/* Price */}
+        <div className="flex items-baseline gap-2">
+          <span className="text-lg font-bold text-primary">${product.precio.toFixed(2)}</span>
+          {product.precio_original && (
+            <span className="text-sm text-muted-foreground line-through">${product.precio_original.toFixed(2)}</span>
+          )}
+        </div>
+
+        {!product.in_stock && (
+          <p className="text-xs text-destructive font-medium">Agotado</p>
+        )}
+      </div>
     </div>
   );
 };

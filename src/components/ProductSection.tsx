@@ -1,114 +1,98 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from './ProductCard';
-import { Sparkles, Flame, Star, TrendingUp } from 'lucide-react';
+import SeasonalBanner from './BannerTemporal';
+import { Sparkles, Flame, Star, TrendingUp, IceCream } from 'lucide-react';
 
-interface Product {
+type Product = {
   id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  console?: string;
-  isNew?: boolean;
-  isOnSale?: boolean;
-  inStock?: boolean;
-  stockCount?: number;
-}
+  nombre: string;
+  descripcion?: string;
+  precio: number;
+  precio_original?: number;
+  perfil_sabor?: string[];
+  info_dietetica?: Record<string, boolean>;
+  es_temporal?: boolean;
+  image_urls?: string[];
+  rating?: number;
+  review_count?: number;
+  is_on_sale?: boolean;
+  is_new?: boolean;
+  in_stock?: boolean;
+  likes_count?: number;
+};
 
-interface ProductSectionProps {
+type ProductSectionProps = {
   title: string;
   products: Product[];
-  onAddToCart?: (productId: string) => void;
-}
+  onLike?: (id: string) => void;
+  seasonal?: boolean;
+};
 
-const ProductSection = ({ title, products, onAddToCart }: ProductSectionProps) => {
+const ProductSection = ({ title, products, onLike, seasonal = false }: ProductSectionProps) => {
   const navigate = useNavigate();
-  const isNewSection = title.includes('Nuevos');
-  const isOfferSection = title.includes('Ofertas');
 
-  const getSectionIcon = () => {
-    if (isNewSection) return <Sparkles className="w-8 h-8 text-[#3fdb70]" />;
-    if (isOfferSection) return <Flame className="w-8 h-8 text-[#d93d34]" />;
-    return <Star className="w-8 h-8 text-[#f3cb49]" />;
-  };
+  const isNewSection = title.toLowerCase().includes('nuevo');
+  const isOfferSection = title.toLowerCase().includes('oferta');
 
-  const getSectionColor = () => {
-    if (isNewSection) return '#3fdb70';
-    if (isOfferSection) return '#d93d34';
-    return '#f3cb49';
-  };
+  const sectionConfig = isNewSection
+    ? { icon: Sparkles, color: 'text-sorbe-mint', gradient: 'from-sorbe-mint to-sorbe-strawberry', desc: 'Los sabores más recientes que debes probar' }
+    : isOfferSection
+    ? { icon: Flame, color: 'text-sorbe-strawberry', gradient: 'from-sorbe-strawberry to-sorbe-raspberry', desc: 'Precios especiales por tiempo limitado' }
+    : { icon: Star, color: 'text-sorbe-lemon', gradient: 'from-sorbe-lemon to-sorbe-peach', desc: '' };
+
+  const Icon = sectionConfig.icon;
 
   return (
-    <section className="py-16 bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-10 left-10 w-32 h-32 border-4 border-[#091024] rounded-lg rotate-12"></div>
-        <div className="absolute bottom-10 right-10 w-24 h-24 border-4 border-[#3bc8da] rounded-full"></div>
-        <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-[#f3cb49] rounded-lg rotate-45"></div>
-      </div>
-
+    <section className="py-16 bg-background relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section Header with Gaming Style */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className={`h-1 w-20 bg-gradient-to-r from-[${getSectionColor()}] to-[#3bc8da] rounded`}></div>
-            {getSectionIcon()}
-            <div className={`h-1 w-20 bg-gradient-to-r from-[#3bc8da] to-[${getSectionColor()}] rounded`}></div>
+        {/* Seasonal banner */}
+        {seasonal && (
+          <div className="mb-8">
+            <SeasonalBanner />
           </div>
-          
-          <h2 className="text-4xl font-black text-[#091024] mb-4">
-            {title}
-          </h2>
-          
-          <div className="flex items-center justify-center gap-2">
-            <TrendingUp className={`w-5 h-5 text-[${getSectionColor()}]`} />
-            <p className="text-gray-600 text-lg">
-              {isNewSection && "Los últimos lanzamientos que no puedes perderte"}
-              {isOfferSection && "Precios increíbles por tiempo limitado"}
-            </p>
+        )}
+
+        {/* Section header */}
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="h-1 w-16 bg-gradient-to-r rounded" style={{ backgroundImage: `linear-gradient(to right, transparent, var(--tw-gradient-stops))` }}></div>
+            <Icon className={`w-7 h-7 ${sectionConfig.color}`} />
+            <div className="h-1 w-16 bg-gradient-to-l rounded"></div>
           </div>
-        </div>
-        
-        {/* Products Grid with Enhanced Design */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-8 items-stretch">
-          {products.map((product, index) => (
-            <div 
-              key={product.id}
-              className="h-full transform hover:scale-105 transition-all duration-300"
-              style={{
-                animationDelay: `${index * 100}ms`
-              }}
-            >
-              <ProductCard
-                name={product.name}
-                price={product.price}
-                originalPrice={product.originalPrice}
-                image={product.image}
-                console={product.console}
-                isNew={product.isNew}
-                isOnSale={product.isOnSale}
-                inStock={product.inStock}
-                stockCount={product.stockCount}
-                onAddToCart={() => onAddToCart?.(product.id)}
-                productId={product.id}
-              />
-            </div>
-          ))}
+
+          <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-2">{title}</h2>
+
+          {sectionConfig.desc && (
+            <p className="text-muted-foreground">{sectionConfig.desc}</p>
+          )}
         </div>
 
-        {/* Enhanced CTA Button */}
+        {/* Products grid */}
+        {products.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {products.map((product) => (
+              <div key={product.id} className="transform hover:scale-[1.02] transition-all duration-300">
+                <ProductCard product={product} onLike={onLike} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16 text-muted-foreground">
+            <IceCream className="w-16 h-16 mx-auto mb-4 opacity-40" />
+            <p className="text-lg">No hay productos en esta sección todavía.</p>
+          </div>
+        )}
+
+        {/* CTA */}
         <div className="text-center mt-12">
-          <button 
+          <button
             onClick={() => navigate('/products')}
-            className="group relative bg-gradient-to-r from-[#091024] to-[#3bc8da] hover:from-[#3bc8da] hover:to-[#091024] text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl"
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105 shadow-lg"
           >
-            <span className="relative z-10 flex items-center justify-center gap-3">
-              <Star className="w-6 h-6 group-hover:animate-spin" />
-              Ver Más Productos
-              <TrendingUp className="w-5 h-5 group-hover:animate-bounce" />
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-[#3fdb70]/20 to-[#f3cb49]/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <IceCream className="w-5 h-5" />
+            Ver Todos los Sabores
+            <TrendingUp className="w-5 h-5" />
           </button>
         </div>
       </div>

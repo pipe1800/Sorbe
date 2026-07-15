@@ -24,6 +24,16 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				sorbe: {
+					cream: '#FFF8E7',
+					strawberry: '#FF6B6B',
+					mint: '#4ECDC4',
+					chocolate: '#2C1810',
+					vanilla: '#FAF3E0',
+					raspberry: '#C44569',
+					peach: '#FFAB91',
+					lemon: '#FFE082',
+				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'

@@ -1,8 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Phone, MapPin, Menu, Search } from 'lucide-react';
+import { ShoppingCart, Phone, MapPin, Menu, Search, IceCream } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
@@ -17,204 +16,131 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
 
   React.useEffect(() => {
     const loadCategories = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('categories')
-        .select('id,name,slug,parent_id,sort_order,is_active')
+        .select('id,nombre,slug,parent_id,sort_order,is_active')
         .eq('is_active', true);
-      if (error || !data) return;
-      // Build hierarchy
-      const parents = data.filter(c => !c.parent_id).sort((a,b)=>(a.sort_order??0)-(b.sort_order??0));
-      const childrenGrouped: Record<string,string[]> = {};
-      data.filter(c => c.parent_id).forEach(c => {
-        const parent = data.find(p => p.id === c.parent_id);
+      if (!data) return;
+      const parents = data.filter((c: any) => !c.parent_id).sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      const childrenGrouped: Record<string, string[]> = {};
+      data.filter((c: any) => c.parent_id).forEach((c: any) => {
+        const parent = data.find((p: any) => p.id === c.parent_id);
         if (!parent) return;
-        if (!childrenGrouped[parent.name]) childrenGrouped[parent.name] = [];
-        childrenGrouped[parent.name].push(c.name);
+        if (!childrenGrouped[parent.nombre]) childrenGrouped[parent.nombre] = [];
+        childrenGrouped[parent.nombre].push(c.nombre);
       });
-      Object.keys(childrenGrouped).forEach(k => {
-        childrenGrouped[k].sort();
-      });
-      setCategories(parents.map(p => ({ name: p.name, subcategories: childrenGrouped[p.name] || [] })));
+      setCategories(parents.map((p: any) => ({ name: p.nombre, subcategories: childrenGrouped[p.nombre] || [] })));
     };
     loadCategories();
   }, []);
 
-  const handleLogoClick = () => {
-    navigate('/');
+  const handleCartClick = () => { onCartClick?.(); navigate('/cart'); };
+  const handleCategoryClick = (category: string) => {
+    navigate(`/products?category=${encodeURIComponent(category)}`);
   };
 
-  const handleCartClick = () => {
-    if (onCartClick) {
-      onCartClick();
-    }
-    navigate('/cart');
-  };
-
-  const handleCategoryClick = (category: string, isParent?: boolean) => {
-    const params = new URLSearchParams();
-    params.set(isParent ? 'parent' : 'category', category);
-    navigate(`/products?${params.toString()}`);
-  };
-
-  const consoleCategoryNames = new Set(['Nintendo Switch', 'PlayStation', 'Xbox']);
+  const navLinks = [
+    { label: 'Menú', href: '/products' },
+    { label: 'Sabores', href: '/sabores' },
+    { label: 'Nosotros', href: '/nosotros' },
+  ];
 
   return (
-    <header className="bg-[#091024] text-white shadow-lg">
-      {/* Top bar with contact info - Hide text on mobile, show icons only */}
-      <div className="bg-[#d93d34] py-1 sm:py-2 hidden md:block">
+    <header className="bg-sorbe-chocolate text-white shadow-lg">
+      {/* Top bar */}
+      <div className="bg-sorbe-strawberry/90 py-1.5 hidden md:block">
         <div className="container mx-auto px-4 flex justify-between items-center text-xs sm:text-sm">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="flex items-center gap-1">
-              <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
-              <a 
-                href="https://wa.me/50379866174" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="hover:text-[#f3cb49] transition-colors hidden sm:inline"
-              >
-                WhatsApp Business
-              </a>
-            </div>
-            <div className="hidden sm:flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              <span>Puntos de entrega en todo El Salvador</span>
-            </div>
+          <div className="flex items-center gap-4">
+            <a href="https://wa.me/503" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-sorbe-cream transition-colors">
+              <Phone className="w-3.5 h-3.5" /> WhatsApp
+            </a>
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" /> Entrega en todo El Salvador
+            </span>
           </div>
-          <div className="hidden sm:block text-sm font-medium">
-            🚚 Envío gratis en puntos de entrega
-          </div>
+          <span>🍦 Hechos al momento</span>
         </div>
       </div>
 
       {/* Main header */}
-      <div className="container mx-auto px-4 py-3 sm:py-4">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Mobile hamburger */}
+          {/* Mobile menu */}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20">
-                  <Menu className="w-5 h-5" />
-                </button>
+                <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20"><Menu className="w-5 h-5" /></button>
               </SheetTrigger>
               <SheetContent side="left" className="w-80 p-0">
-                <SheetHeader className="p-4 border-b">
-                  <SheetTitle>Categorías</SheetTitle>
-                </SheetHeader>
+                <SheetHeader className="p-4 border-b"><SheetTitle>Menú</SheetTitle></SheetHeader>
                 <div className="p-4 space-y-3">
-                  {/* Search in drawer */}
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      if (!query.trim()) return;
-                      navigate(`/products?search=${encodeURIComponent(query.trim())}`);
-                    }}
-                    role="search"
-                    aria-label="Buscar productos"
-                    className="w-full"
-                  >
-                    <div className="flex items-stretch gap-2 bg-white rounded-lg p-1 w-full">
-                      <div className="flex items-center px-2 text-[#091024]/70">
-                        <Search className="w-4 h-4" />
-                      </div>
-                      <input
-                        type="search"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Buscar productos..."
-                        className="flex-1 bg-transparent text-[#091024] placeholder-gray-500 focus:outline-none py-2 px-1 text-sm min-w-0"
-                      />
-                      <SheetClose asChild>
-                        <button type="submit" className="bg-[#3bc8da] hover:bg-[#3fdb70] text-white font-bold px-3 rounded-md shrink-0">
-                          Buscar
-                        </button>
-                      </SheetClose>
+                  <form onSubmit={(e) => { e.preventDefault(); if (query.trim()) navigate(`/products?search=${encodeURIComponent(query)}`); }}>
+                    <div className="flex gap-2">
+                      <input type="search" placeholder="Buscar sabores..." value={query} onChange={(e) => setQuery(e.target.value)}
+                        className="flex-1 bg-muted rounded-lg px-3 py-2 text-sm text-foreground" />
+                      <button type="submit" className="bg-primary text-primary-foreground px-3 py-2 rounded-lg"><Search className="w-4 h-4" /></button>
                     </div>
                   </form>
-                  
-                  <SheetClose asChild>
-                    <button
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50"
-                      onClick={() => navigate('/')}
-                    >
-                      Inicio
-                    </button>
-                  </SheetClose>
-
-                  {/* Console categories as dropdowns */}
-                  <Accordion type="multiple" className="w-full">
-                    {categories.map(cat => (
-                      consoleCategoryNames.has(cat.name) && cat.subcategories.length > 0 ? (
-                        <AccordionItem key={cat.name} value={cat.name} className="border-none">
-                          <AccordionTrigger className="px-3 py-2 font-medium text-left" onClick={(e) => { e.preventDefault(); handleCategoryClick(cat.name, true); }}>
-                            {cat.name}
-                          </AccordionTrigger>
-                          <AccordionContent className="pt-0">
-                            <div className="pl-2">
-                              {cat.subcategories.map(sub => (
-                                <SheetClose asChild key={sub}>
-                                  <button className="block w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700" onClick={() => handleCategoryClick(sub, false)}>
-                                    {sub}
-                                  </button>
-                                </SheetClose>
-                              ))}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      ) : null
-                    ))}
-                  </Accordion>
-
-                  {/* Non-console categories keep previous behavior */}
-                  {categories.map(cat => (
-                    !consoleCategoryNames.has(cat.name) ? (
-                      <div key={cat.name}>
-                        <SheetClose asChild>
-                          <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 font-medium" onClick={() => handleCategoryClick(cat.name, true)}>
-                            {cat.name}
-                          </button>
+                  {navLinks.map((link) => (
+                    <SheetClose key={link.href} asChild>
+                      <button onClick={() => navigate(link.href)} className="block w-full text-left py-2 text-foreground hover:text-primary font-medium">{link.label}</button>
+                    </SheetClose>
+                  ))}
+                  <hr />
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Categorías</p>
+                  {categories.map((cat) => (
+                    <div key={cat.name}>
+                      <SheetClose asChild>
+                        <button onClick={() => handleCategoryClick(cat.name)} className="block w-full text-left py-1.5 font-medium hover:text-primary">{cat.name}</button>
+                      </SheetClose>
+                      {cat.subcategories.map((sub) => (
+                        <SheetClose key={sub} asChild>
+                          <button onClick={() => handleCategoryClick(sub)} className="block w-full text-left py-1 pl-4 text-sm text-muted-foreground hover:text-primary">{sub}</button>
                         </SheetClose>
-                        {cat.subcategories.length > 0 && (
-                          <div className="pl-4">
-                            {cat.subcategories.map(sub => (
-                              <SheetClose asChild key={sub}>
-                                <button className="block w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700" onClick={() => handleCategoryClick(sub)}>
-                                  {sub}
-                                </button>
-                              </SheetClose>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : null
+                      ))}
+                    </div>
                   ))}
                 </div>
               </SheetContent>
             </Sheet>
           </div>
 
-          {/* Logo - Now clickable */}
-          <button 
-            onClick={handleLogoClick}
-            className="flex items-center gap-3 sm:gap-4 hover:opacity-80 transition-opacity"
-          >
-            <img 
-              src="/placeholder.svg" 
-              alt="Sorbe" 
-              className="w-10 h-10 sm:w-12 sm:h-12"
-            />
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <button key={link.href} onClick={() => navigate(link.href)} className="text-white/80 hover:text-white font-medium transition-colors">{link.label}</button>
+            ))}
+            {/* Desktop category dropdown */}
+            <div className="relative group">
+              <button className="text-white/80 hover:text-white font-medium transition-colors flex items-center gap-1">
+                Categorías <svg className="w-3 h-3" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" /></svg>
+              </button>
+              <div className="absolute top-full left-0 mt-2 bg-white text-sorbe-chocolate rounded-xl shadow-xl p-4 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                {categories.map((cat) => (
+                  <div key={cat.name} className="mb-3 last:mb-0">
+                    <button onClick={() => handleCategoryClick(cat.name)} className="font-semibold text-sm hover:text-primary w-full text-left">{cat.name}</button>
+                    {cat.subcategories.map((sub) => (
+                      <button key={sub} onClick={() => handleCategoryClick(sub)} className="block text-sm text-muted-foreground hover:text-primary pl-3 py-0.5 w-full text-left">{sub}</button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </nav>
+
+          {/* Logo */}
+          <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <IceCream className="w-8 h-8 sm:w-10 sm:h-10 text-sorbe-strawberry" />
             <span className="text-white font-bold text-xl sm:text-2xl">Sorbe</span>
           </button>
 
           {/* Cart */}
-          <button
-            onClick={handleCartClick}
-            className="relative bg-[#3fdb70] hover:bg-[#3fdb70]/90 text-[#091024] px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
-          >
+          <button onClick={handleCartClick}
+            className="relative bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
             <ShoppingCart className="w-5 h-5" />
             <span className="hidden sm:inline">Carrito</span>
             {cartItemsCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-[#d93d34] text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs sm:text-sm font-bold">
+              <span className="absolute -top-2 -right-2 bg-destructive text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                 {cartItemsCount}
               </span>
             )}
