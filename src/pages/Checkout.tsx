@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, CreditCard, Truck, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CreditCard, Truck, ShoppingBag, MapPin } from 'lucide-react';
 import Header from '@/components/Header';
-import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -10,656 +9,233 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { elSalvadorDepartments, Department, Municipality } from '@/data/elSalvadorData';
 import { wompiService } from '@/integrations/wompi';
 import { orderService } from '@/integrations/supabase/orderService';
 import { notificationService } from '@/integrations/supabase/notificationService';
+import { supabase } from '@/integrations/supabase/client';
 
-interface CartItem {
+type CartItem = {
   id: string;
-  name: string;
-  price: number;
+  nombre: string;
+  precio: number;
+  talla?: string;
   image: string;
-  console: string;
   quantity: number;
-}
+};
 
-interface DeliveryPoint {
-  id: string;
-  name: string;
-  address: string;
-}
-
-const deliveryPoints: DeliveryPoint[] = [
-  { id: 'metrocentro', name: 'Metrocentro', address: 'Boulevard de los Héroes, San Salvador' },
-  { id: 'galerias', name: 'Galerías', address: 'Boulevard del Hipódromo, San Salvador' },
-  { id: 'torre-futura', name: 'Torre Futura', address: 'Alameda Roosevelt, San Salvador' },
-  { id: 'escalon', name: 'Escalón', address: 'Colonia Escalón, San Salvador' },
-  { id: 'santa-tecla', name: 'Santa Tecla', address: 'Santa Tecla, La Libertad' },
-  { id: 'santa-elena', name: 'Santa Elena', address: 'Santa Elena, Antiguo Cuscatlán' },
-  { id: 'gran-via', name: 'La Gran Vía', address: 'Antiguo Cuscatlán, La Libertad' },
-  { id: 'antiguo-cuscatlan', name: 'Antiguo Cuscatlán', address: 'Antiguo Cuscatlán, La Libertad' },
-  { id: '75-av-norte', name: '75 Av. Norte', address: '75 Avenida Norte, San Salvador' },
-  { id: 'la-bernal', name: 'La Bernal', address: 'La Bernal, San Salvador' },
-];
+type DeliveryMethod = 'recoger' | 'domicilio';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [cartItemsCount, setCartItemsCount] = useState(0);
   const { toast } = useToast();
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Form states
-  const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>('pickup');
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
-  const [selectedDeliveryPoint, setSelectedDeliveryPoint] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedMunicipality, setSelectedMunicipality] = useState('');
-  const [availableMunicipalities, setAvailableMunicipalities] = useState<Municipality[]>([]);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [customerData, setCustomerData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    detailedAddress: '',
-    referencePoint: '',
-    pickupDetails: '' // NUEVO: detalles para punto de entrega
-  });
+  // Form state
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [metodoEntrega, setMetodoEntrega] = useState<DeliveryMethod>('recoger');
+  const [direccion, setDireccion] = useState('');
+  const [referencia, setReferencia] = useState('');
+  const [notas, setNotas] = useState('');
+  const [metodoPago, setMetodoPago] = useState('wompi');
 
   useEffect(() => {
-    // Load cart items from localStorage
-    const savedCart = localStorage.getItem('cartItems');
-    const savedCount = localStorage.getItem('cartItemsCount');
-    
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
+    const saved = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    setItems(saved);
+    if (saved.length === 0) navigate('/cart');
+  }, []);
+
+  const subtotal = items.reduce((s, i) => s + i.precio * i.quantity, 0);
+  const envio = metodoEntrega === 'domicilio' ? 3.00 : 0;
+  const total = subtotal + envio;
+  const count = items.reduce((s, i) => s + i.quantity, 0);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nombre || !email || !telefono) {
+      toast({ title: 'Campos requeridos', description: 'Completa nombre, email y teléfono.', variant: 'destructive' });
+      return;
     }
-    if (savedCount) {
-      setCartItemsCount(parseInt(savedCount));
-    }
-
-    // If cart is empty, redirect to products
-    if (!savedCart || JSON.parse(savedCart).length === 0) {
-      navigate('/products');
-    }
-  }, [navigate]);
-
-  const getTotalPrice = () => {
-    const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-    const shippingCost = deliveryType === 'delivery' ? 4 : 0;
-    return subtotal + shippingCost;
-  };
-
-  const getSubtotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
-
-  // Update municipalities when department changes
-  useEffect(() => {
-    if (selectedDepartment) {
-      const department = elSalvadorDepartments.find(dept => dept.id === selectedDepartment);
-      if (department) {
-        setAvailableMunicipalities(department.municipalities);
-        setSelectedMunicipality(''); // Reset municipality selection
-      }
-    } else {
-      setAvailableMunicipalities([]);
-      setSelectedMunicipality('');
-    }
-  }, [selectedDepartment]);
-
-  const handleInputChange = (field: string, value: string) => {
-    setCustomerData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const validateForm = () => {
-    const { firstName, lastName, email, phone } = customerData;
-    
-    if (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim()) {
-      toast({
-        title: "Datos requeridos",
-        description: "Por favor completa nombre, apellido, email y teléfono.",
-        variant: "destructive",
-      });
-      return false;
+    if (metodoEntrega === 'domicilio' && !direccion) {
+      toast({ title: 'Dirección requerida', description: 'Ingresa la dirección de entrega.', variant: 'destructive' });
+      return;
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast({
-        title: "Email inválido",
-        description: "Por favor ingresa un email válido.",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    if (deliveryType === 'pickup') {
-      if (!selectedDeliveryPoint || !customerData.pickupDetails.trim()) {
-        toast({
-          title: "Datos requeridos",
-            description: "Selecciona un punto de entrega y añade los detalles (ej: frente al Starbucks)",
-          variant: "destructive",
-        });
-        return false;
-      }
-    }
-    if (deliveryType === 'delivery') {
-      const { detailedAddress, referencePoint } = customerData;
-      if (!selectedDepartment || !selectedMunicipality || !detailedAddress.trim() || !referencePoint.trim()) {
-        toast({
-          title: "Datos de entrega requeridos",
-          description: "Por favor completa todos los datos de entrega obligatorios.",
-          variant: "destructive",
-        });
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  const handlePlaceOrder = async () => {
-    if (!validateForm()) return;
-
-    setIsProcessingPayment(true);
-
+    setLoading(true);
     try {
-      const orderReference = `ORDER-${Date.now()}`;
-      const subtotalAmount = getSubtotal();
-      const shippingAmount = deliveryType === 'delivery' ? 4 : 0;
-      const totalAmount = subtotalAmount + shippingAmount;
-      
-      // Store reference in localStorage for fallback
-      localStorage.setItem('currentOrderReference', orderReference);
-      
-      // Prepare customer address for delivery
-      const customerAddress = deliveryType === 'delivery' 
-        ? customerData.detailedAddress
-        : `Punto: ${deliveryPoints.find(p => p.id === selectedDeliveryPoint)?.name || selectedDeliveryPoint} - Detalles: ${customerData.pickupDetails}`;
-
-      // Create order in database with cart items
+      // Create order via orderService if available, otherwise direct insert
       const orderData = {
-        customer_name: `${customerData.firstName} ${customerData.lastName}`,
-        customer_email: customerData.email,
-        customer_phone: customerData.phone || '',
-        customer_address: customerAddress || '',
-        product_id: cartItems[0]?.id, // Keep for backward compatibility
-        quantity: cartItems.reduce((total, item) => total + item.quantity, 0),
-        total_amount: totalAmount,
-        payment_method: paymentMethod === 'card' ? 'credit-debit' : 'cash',
-        wompi_reference: orderReference, // Use wompi_reference which exists in the database
-        payment_reference: orderReference, // Also set payment_reference since we added it
-        cart_items: cartItems.map(item => ({
-          id: item.id,
-          quantity: item.quantity,
-          price: item.price
-        }))
+        customer_name: nombre,
+        customer_email: email,
+        customer_phone: telefono,
+        customer_address: metodoEntrega === 'domicilio' ? direccion : 'Recoger en tienda',
+        product_id: items[0].id,
+        talla_seleccionada: items[0].talla || null,
+        quantity: count,
+        total_amount: total,
+        metodo_entrega: metodoEntrega,
+        direccion_entrega: metodoEntrega === 'domicilio' ? { direccion, referencia } : {},
+        notas_pedido: notas,
+        status: 'pendiente',
+        payment_method: metodoPago,
       };
 
-      const order = await orderService.createOrder(orderData);
-      const relatedOrders = await orderService.listOrdersByReference(orderReference);
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert(orderData)
+        .select()
+        .single();
 
-      const orderIdByProductId = new Map<string, string>();
-      relatedOrders.forEach((entry: any) => {
-        if (entry?.product_id && entry?.id) {
-          orderIdByProductId.set(entry.product_id, entry.id);
+      if (orderError) throw orderError;
+
+      // Try to create Wompi payment link
+      if (metodoPago === 'wompi') {
+        try {
+          const paymentResult = await wompiService.createPaymentLink({
+            amount: total,
+            reference: order.id,
+            description: `Pedido Sorbe - ${nombre}`,
+          });
+          if (paymentResult?.url) {
+            localStorage.setItem('currentOrderReference', order.id);
+            window.location.href = paymentResult.url;
+            return;
+          }
+        } catch (wompiErr) {
+          console.error('Wompi error:', wompiErr);
         }
-      });
-
-      const departmentInfo = elSalvadorDepartments.find((dept) => dept.id === selectedDepartment);
-      const departmentName = departmentInfo?.name;
-      const municipalityName = departmentInfo?.municipalities.find((muni) => muni.id === selectedMunicipality)?.name;
-      const deliveryPoint = deliveryPoints.find((point) => point.id === selectedDeliveryPoint);
-
-      const baseNotes: string[] = [];
-      baseNotes.push(`Total de artículos: ${cartItems.reduce((total, item) => total + item.quantity, 0)}`);
-      if (relatedOrders.length > 0) {
-        baseNotes.push(`Pedidos generados: ${relatedOrders.length}`);
-        baseNotes.push(
-          `IDs: ${relatedOrders.map((item: any) => item.id).join(', ')}`
-        );
-      }
-      if (deliveryType === 'delivery') {
-        baseNotes.push('Entrega a domicilio');
-      } else if (deliveryPoint) {
-        baseNotes.push(`Recoger en ${deliveryPoint.name} (${deliveryPoint.address})`);
       }
 
-      const baseNotificationPayload = {
-        summary: {
-          orderId: order?.id ?? undefined,
-          orderReference,
-          paymentMethod: paymentMethod === 'card' ? 'Tarjeta (WOMPI)' : 'Efectivo contra entrega',
-          totalAmount,
-          currency: 'USD',
-          placedAt: new Date().toISOString(),
-          subtotal: subtotalAmount,
-          shippingAmount,
-        },
-        customer: {
-          name: orderData.customer_name,
-          email: orderData.customer_email,
-          phone: orderData.customer_phone || undefined,
-          address: customerAddress || undefined,
-          deliveryType,
-          deliveryPointName: deliveryPoint?.name,
-          deliveryDepartment: departmentName,
-          deliveryMunicipality: municipalityName,
-          pickupDetails: customerData.pickupDetails || undefined,
-        },
-        items: cartItems.map((item) => ({
-          id: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          image: item.image,
-          console: item.console,
-          orderId: orderIdByProductId.get(item.id),
-        })),
-      };
-
-      const buildNotificationPayload = (paymentStatus: string, additionalNotes: string[] = []) => ({
-        ...baseNotificationPayload,
-        summary: {
-          ...baseNotificationPayload.summary,
-          paymentStatus,
-        },
-        notes: [...baseNotes, ...additionalNotes].filter(Boolean).join('\n') || undefined,
-      });
-
-      if (paymentMethod === 'card') {
-        // Process WOMPI payment
-        const paymentData = {
-          amount: totalAmount,
-          currency: 'USD',
-          reference: orderReference,
-          customerEmail: orderData.customer_email,
-          customerName: orderData.customer_name,
-          customerPhone: customerData.phone || undefined,
-          redirectUrl: `${window.location.origin}/payment/success`,
-        };
-
-        const paymentResponse = await wompiService.createPaymentLink(paymentData);
-        
-        // Update order with WOMPI payment link info
-        await orderService.updateOrderPayment(order.id, {
-          payment_status: 'processing',
-          wompi_payment_link_id: paymentResponse.data.id,
-        });
-
-        // Create payment record
-        await orderService.createPaymentRecord({
-          order_id: order.id,
-          amount: totalAmount,
-          payment_method: 'credit-debit',
-          processor_reference: orderReference,
-          processor_payment_link: paymentResponse.data.payment_link_url,
-        });
-
-        notificationService
-          .sendOrderNotification(buildNotificationPayload('processing', ['Pago con tarjeta en WOMPI']))
-          .catch((error) => console.error('Error sending order notification:', error));
-
-        // Clear cart before redirecting
-        localStorage.removeItem('cartItems');
-        localStorage.removeItem('cartItemsCount');
-
-        // Redirect to WOMPI checkout
-        window.location.href = paymentResponse.data.payment_link_url;
-      } else {
-        // Handle cash payment
-        await orderService.updateOrderPayment(order.id, {
-          payment_status: 'pending',
-        });
-
-        // Create payment record for cash
-        await orderService.createPaymentRecord({
-          order_id: order.id,
-          amount: totalAmount,
-          payment_method: 'cash',
-        });
-
-        notificationService
-          .sendOrderNotification(buildNotificationPayload('pending', ['Pago en efectivo contra entrega']))
-          .catch((error) => console.error('Error sending order notification:', error));
-
-        toast({
-          title: "¡Pedido realizado!",
-          description: "Tu pedido ha sido enviado correctamente. Te contactaremos pronto.",
-        });
-        
-        // Clear cart and redirect
-        localStorage.removeItem('cartItems');
-        localStorage.removeItem('cartItemsCount');
-        navigate('/');
-      }
-    } catch (err) {
-      console.error('Error processing order:', err);
-      toast({
-        title: "Error en el pedido",
-        description: err instanceof Error ? err.message : 'Error al procesar el pedido',
-        variant: "destructive",
-      });
+      // Fallback: redirect to success
+      toast({ title: 'Pedido creado', description: 'Tu pedido ha sido registrado.' });
+      localStorage.removeItem('cartItems');
+      localStorage.removeItem('cartItemsCount');
+      navigate('/payment/success');
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'No se pudo procesar el pedido.', variant: 'destructive' });
     } finally {
-      setIsProcessingPayment(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#091024] via-slate-800 to-white">
-      <Header cartItemsCount={cartItemsCount} onCartClick={() => navigate('/cart')} />
-      <Navigation />
-      
-      <div className="container mx-auto px-4 py-8">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate('/cart')}
-          className="flex items-center gap-2 text-white hover:text-[#3bc8da] mb-8 transition-colors bg-[#091024]/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-xl border border-[#3bc8da]/30"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="font-medium">Volver al Carrito</span>
+    <div className="min-h-screen bg-background">
+      <Header cartItemsCount={count} />
+
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <button onClick={() => navigate('/cart')} className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6">
+          <ArrowLeft className="w-4 h-4" /> Volver al carrito
         </button>
 
-        {/* Page Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-black text-white mb-3 sm:mb-4 flex items-center justify-center gap-3">
-            <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-[#3bc8da]" />
-            Hacer Pedido
-          </h1>
-          <p className="text-gray-300 text-base sm:text-lg">Completa tu información para finalizar el pedido</p>
-        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-8">Finalizar Pedido</h1>
 
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
-          
-          {/* Order Form - Full width on mobile */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            
-            {/* Customer Information */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border-2 border-[#3bc8da]/20">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#091024] mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-[#3bc8da]" />
-                Información Personal
-              </h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <Label htmlFor="firstName">Nombre *</Label>
-                  <Input
-                    id="firstName"
-                    value={customerData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    placeholder="Tu nombre"
-                    className="mt-2"
-                  />
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Order summary */}
+          <div className="bg-card rounded-2xl p-6 border border-border">
+            <h2 className="font-bold text-lg mb-4 flex items-center gap-2"><ShoppingBag className="w-5 h-5" /> Resumen ({count} items)</h2>
+            <div className="space-y-2">
+              {items.map(item => (
+                <div key={item.id} className="flex justify-between text-sm">
+                  <span>{item.nombre} {item.talla ? `(${item.talla})` : ''} x{item.quantity}</span>
+                  <span className="font-medium">${(item.precio * item.quantity).toFixed(2)}</span>
                 </div>
-                <div>
-                  <Label htmlFor="lastName">Apellido *</Label>
-                  <Input
-                    id="lastName"
-                    value={customerData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    placeholder="Tu apellido"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={customerData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="tu@email.com"
-                    className="mt-2"
-                    required
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="phone">Teléfono Celular *</Label>
-                  <Input
-                    id="phone"
-                    value={customerData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="Ej: 7123-4567"
-                    className="mt-2"
-                  />
-                </div>
-              </div>
+              ))}
             </div>
-
-            {/* Delivery Type */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border-2 border-[#3bc8da]/20">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#091024] mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-[#3bc8da]" />
-                Tipo de Entrega
-              </h2>
-              
-              <RadioGroup value={deliveryType} onValueChange={(value: 'pickup' | 'delivery') => setDeliveryType(value)}>
-                <div className="flex items-center space-x-2 p-4 rounded-lg border-2 border-gray-200 hover:border-[#3bc8da] transition-colors">
-                  <RadioGroupItem value="pickup" id="pickup" />
-                  <div className="flex-1">
-                    <Label htmlFor="pickup" className="font-medium text-lg cursor-pointer">
-                      Punto de Entrega Gratuito
-                    </Label>
-                    <p className="text-gray-600 text-sm">Retira tu pedido en uno de nuestros puntos de entrega</p>
-                  </div>
-                  <MapPin className="w-6 h-6 text-[#3fdb70]" />
-                </div>
-                
-                <div className="flex items-center space-x-2 p-4 rounded-lg border-2 border-gray-200 hover:border-[#3bc8da] transition-colors">
-                  <RadioGroupItem value="delivery" id="delivery" />
-                  <div className="flex-1">
-                    <Label htmlFor="delivery" className="font-medium text-lg cursor-pointer">
-                      Envío a Domicilio (+$4.00)
-                    </Label>
-                    <p className="text-gray-600 text-sm">Enviamos a todo El Salvador</p>
-                  </div>
-                  <Truck className="w-6 h-6 text-[#3bc8da]" />
-                </div>
-              </RadioGroup>
-
-              {/* Delivery Point Selection */}
-              {deliveryType === 'pickup' && (
-                <div className="mt-6 space-y-4">
-                  <div>
-                    <Label>Selecciona tu punto de entrega *</Label>
-                    <Select value={selectedDeliveryPoint} onValueChange={setSelectedDeliveryPoint}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Elige un punto de entrega" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        {deliveryPoints.map((point) => (
-                          <SelectItem key={point.id} value={point.id}>
-                            <div>
-                              <div className="font-medium">{point.name}</div>
-                              <div className="text-sm text-gray-600">{point.address}</div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="pickupDetails">Detalles del Punto de Entrega *</Label>
-                    <Textarea
-                      id="pickupDetails"
-                      value={customerData.pickupDetails}
-                      onChange={(e) => handleInputChange('pickupDetails', e.target.value)}
-                      placeholder="Ej: Frente al Starbucks, entrada principal, junto a la fuente"
-                      className="mt-2"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Añade una referencia clara para encontrarnos fácilmente.</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Delivery Address */}
-              {deliveryType === 'delivery' && (
-                <div className="mt-6 space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div>
-                      <Label htmlFor="department">Departamento *</Label>
-                      <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                        <SelectTrigger className="mt-2">
-                          <SelectValue placeholder="Selecciona tu departamento" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          {elSalvadorDepartments.map((department) => (
-                            <SelectItem key={department.id} value={department.id}>
-                              {department.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="municipality">Municipio *</Label>
-                      <Select 
-                        value={selectedMunicipality} 
-                        onValueChange={setSelectedMunicipality}
-                        disabled={!selectedDepartment}
-                      >
-                        <SelectTrigger className="mt-2">
-                          <SelectValue placeholder={selectedDepartment ? "Selecciona tu municipio" : "Primero selecciona un departamento"} />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          {availableMunicipalities.map((municipality) => (
-                            <SelectItem key={municipality.id} value={municipality.id}>
-                              {municipality.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="detailedAddress">Dirección Detallada *</Label>
-                    <Textarea
-                      id="detailedAddress"
-                      value={customerData.detailedAddress}
-                      onChange={(e) => handleInputChange('detailedAddress', e.target.value)}
-                      placeholder="Calle, número de casa, colonia, etc."
-                      className="mt-2"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="referencePoint">Punto de Referencia *</Label>
-                    <Input
-                      id="referencePoint"
-                      value={customerData.referencePoint}
-                      onChange={(e) => handleInputChange('referencePoint', e.target.value)}
-                      placeholder="Ej: Casa verde, frente al parque"
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Payment Method */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border-2 border-[#3bc8da]/20">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#091024] mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-[#3bc8da]" />
-                Método de Pago
-              </h2>
-              
-              <RadioGroup value={paymentMethod} onValueChange={(value: 'cash' | 'card') => setPaymentMethod(value)}>
-                <div className="flex items-center space-x-2 p-4 rounded-lg border-2 border-gray-200 hover:border-[#3bc8da] transition-colors">
-                  <RadioGroupItem value="cash" id="cash" />
-                  <div className="flex-1">
-                    <Label htmlFor="cash" className="font-medium text-lg cursor-pointer">
-                      Contra Entrega
-                    </Label>
-                    <p className="text-gray-600 text-sm">Paga cuando recibas tu pedido</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-2 p-4 rounded-lg border-2 border-gray-200 hover:border-[#3bc8da] transition-colors">
-                  <RadioGroupItem value="card" id="card" />
-                  <div className="flex-1">
-                    <Label htmlFor="card" className="font-medium text-lg cursor-pointer">
-                      Tarjeta de Débito/Crédito
-                    </Label>
-                    <p className="text-gray-600 text-sm">Pago seguro en línea</p>
-                  </div>
-                </div>
-              </RadioGroup>
+            <div className="border-t border-border mt-4 pt-4 space-y-1">
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Envío</span><span>{envio > 0 ? `$${envio.toFixed(2)}` : 'Gratis'}</span></div>
+              <div className="flex justify-between font-bold text-lg pt-2"><span>Total</span><span className="text-primary">${total.toFixed(2)}</span></div>
             </div>
           </div>
 
-          {/* Order Summary - Sticky on desktop, normal on mobile */}
-          <div className="lg:col-span-1">
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border-2 border-[#3bc8da]/20 lg:sticky lg:top-8">
-              <h2 className="text-lg sm:text-xl font-bold text-[#091024] mb-4 sm:mb-6">Resumen del Pedido</h2>
-              
-              {/* Cart Items */}
-              <div className="space-y-3 mb-6">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
-                    <img src={item.image} alt={item.name} className="w-12 h-12 rounded object-cover" />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm text-[#091024]">{item.name}</h4>
-                      <p className="text-xs text-gray-600">{item.console}</p>
-                      <p className="text-sm font-bold text-[#3fdb70]">
-                        ${item.price.toFixed(2)} x {item.quantity}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Pricing */}
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium text-[#091024]">${getSubtotal().toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Envío</span>
-                  <span className="font-medium text-[#091024]">
-                    {deliveryType === 'delivery' ? '$4.00' : 'Gratis'}
-                  </span>
-                </div>
-                <div className="border-t border-gray-200 pt-3">
-                  <div className="flex justify-between text-xl font-bold">
-                    <span className="text-[#091024]">Total</span>
-                    <span className="text-[#3fdb70]">${getTotalPrice().toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                onClick={handlePlaceOrder}
-                disabled={isProcessingPayment}
-                className="w-full bg-gradient-to-r from-[#3bc8da] to-[#3fdb70] hover:from-[#3fdb70] hover:to-[#3bc8da] text-white py-3 sm:py-4 px-6 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isProcessingPayment ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    {paymentMethod === 'card' ? 'Procesando Pago...' : 'Creando Pedido...'}
-                  </div>
-                ) : (
-                  'Confirmar Pedido'
-                )}
-              </Button>
-
-              <p className="text-xs text-gray-500 mt-4 text-center">
-                Al confirmar tu pedido, aceptas nuestros términos y condiciones
-              </p>
+          {/* Customer info */}
+          <div className="bg-card rounded-2xl p-6 border border-border space-y-4">
+            <h2 className="font-bold text-lg">Tus Datos</h2>
+            <div>
+              <Label htmlFor="nombre">Nombre completo *</Label>
+              <Input id="nombre" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Tu nombre" required />
+            </div>
+            <div>
+              <Label htmlFor="email">Email *</Label>
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" required />
+            </div>
+            <div>
+              <Label htmlFor="telefono">Teléfono *</Label>
+              <Input id="telefono" value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="+503 ---- ----" required />
             </div>
           </div>
-        </div>
+
+          {/* Delivery method */}
+          <div className="bg-card rounded-2xl p-6 border border-border">
+            <h2 className="font-bold text-lg mb-4 flex items-center gap-2"><Truck className="w-5 h-5" /> Método de Entrega</h2>
+            <RadioGroup value={metodoEntrega} onValueChange={v => setMetodoEntrega(v as DeliveryMethod)} className="gap-4">
+              <div className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${metodoEntrega === 'recoger' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                <RadioGroupItem value="recoger" id="recoger" />
+                <Label htmlFor="recoger" className="cursor-pointer">
+                  <span className="font-medium">Recoger en tienda</span>
+                  <span className="block text-sm text-muted-foreground">Gratis — recoge tu pedido en nuestro local</span>
+                </Label>
+              </div>
+              <div className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${metodoEntrega === 'domicilio' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                <RadioGroupItem value="domicilio" id="domicilio" />
+                <Label htmlFor="domicilio" className="cursor-pointer">
+                  <span className="font-medium">Entrega a domicilio</span>
+                  <span className="block text-sm text-muted-foreground">$3.00 — San Salvador y área metropolitana</span>
+                </Label>
+              </div>
+            </RadioGroup>
+
+            {metodoEntrega === 'domicilio' && (
+              <div className="mt-4 space-y-3 pl-8">
+                <div>
+                  <Label htmlFor="direccion">Dirección *</Label>
+                  <Input id="direccion" value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Calle, colonia, número..." />
+                </div>
+                <div>
+                  <Label htmlFor="referencia">Referencia</Label>
+                  <Input id="referencia" value={referencia} onChange={e => setReferencia(e.target.value)} placeholder="Punto de referencia" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Payment method */}
+          <div className="bg-card rounded-2xl p-6 border border-border">
+            <h2 className="font-bold text-lg mb-4 flex items-center gap-2"><CreditCard className="w-5 h-5" /> Método de Pago</h2>
+            <RadioGroup value={metodoPago} onValueChange={setMetodoPago} className="gap-4">
+              {[
+                { value: 'wompi', label: 'Tarjeta (Wompi)', desc: 'Paga con tarjeta de crédito o débito' },
+                { value: 'efectivo', label: 'Efectivo', desc: 'Paga al recibir o recoger tu pedido' },
+                { value: 'transferencia', label: 'Transferencia', desc: 'Transferencia bancaria' },
+              ].map(pm => (
+                <div key={pm.value} className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${metodoPago === pm.value ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                  <RadioGroupItem value={pm.value} id={pm.value} />
+                  <Label htmlFor={pm.value} className="cursor-pointer">
+                    <span className="font-medium">{pm.label}</span>
+                    <span className="block text-sm text-muted-foreground">{pm.desc}</span>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+
+          {/* Notes */}
+          <div className="bg-card rounded-2xl p-6 border border-border">
+            <Label htmlFor="notas">Notas adicionales</Label>
+            <Textarea id="notas" value={notas} onChange={e => setNotas(e.target.value)} placeholder="Instrucciones especiales..." className="mt-2" />
+          </div>
+
+          <Button type="submit" disabled={loading} className="w-full py-6 text-lg">
+            {loading ? 'Procesando...' : `Pagar $${total.toFixed(2)}`}
+          </Button>
+        </form>
       </div>
 
       <Footer />
     </div>
   );
-}
+};
 
 export default Checkout;
