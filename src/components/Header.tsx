@@ -65,6 +65,12 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
       {/* Main header */}
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
+          {/* Logo */}
+          <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
+            <img src="/logo-cono.png" alt="Sorbe" className="w-8 h-8 sm:w-10 sm:h-10" />
+            <img src="/logo-texto.png" alt="Sorbe" className="h-7 sm:h-9" />
+          </button>
+
           {/* Mobile menu */}
           <div className="md:hidden">
             <Sheet>
@@ -127,12 +133,6 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
               </div>
             </div>
           </nav>
-
-          {/* Logo */}
-          <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src="/logo-cono.png" alt="Sorbe" className="w-8 h-8 sm:w-10 sm:h-10" />
-            <img src="/logo-texto.png" alt="Sorbe" className="h-7 sm:h-9" />
-          </button>
 
           {/* Cart */}
           <button onClick={handleCartClick}
