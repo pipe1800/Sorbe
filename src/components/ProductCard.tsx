@@ -51,13 +51,13 @@ const ProductCard = ({ product, onLike, compact = false }: ProductCardProps) => 
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.es_temporal && (
-            <span className="bg-sorbe-primary text-white text-xs px-2 py-0.5 rounded-full font-medium">Temporal</span>
+            <span className="bg-sorbe-strawberry text-white text-xs px-2 py-0.5 rounded-full font-medium">Temporal</span>
           )}
           {product.is_new && (
-            <span className="bg-sorbe-teal text-sorbe-blue text-xs px-2 py-0.5 rounded-full font-medium">Nuevo</span>
+            <span className="bg-sorbe-mint text-sorbe-chocolate text-xs px-2 py-0.5 rounded-full font-medium">Nuevo</span>
           )}
           {discount > 0 && (
-            <span className="bg-sorbe-orange text-white text-xs px-2 py-0.5 rounded-full font-medium">-{discount}%</span>
+            <span className="bg-sorbe-raspberry text-white text-xs px-2 py-0.5 rounded-full font-medium">-{discount}%</span>
           )}
         </div>
         {/* Like button */}
@@ -65,7 +65,7 @@ const ProductCard = ({ product, onLike, compact = false }: ProductCardProps) => 
           onClick={(e) => { e.stopPropagation(); onLike?.(product.id); }}
           className="absolute top-2 right-2 p-1.5 bg-white/80 hover:bg-white rounded-full transition-colors"
         >
-          <Heart className="w-4 h-4 text-sorbe-primary" fill={product.likes_count && product.likes_count > 0 ? 'currentColor' : 'none'} />
+          <Heart className="w-4 h-4 text-sorbe-strawberry" fill={product.likes_count && product.likes_count > 0 ? 'currentColor' : 'none'} />
         </button>
       </div>
 
@@ -92,7 +92,7 @@ const ProductCard = ({ product, onLike, compact = false }: ProductCardProps) => 
         {/* Rating */}
         {product.rating && product.rating > 0 && (
           <div className="flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 text-sorbe-green" fill="currentColor" />
+            <Star className="w-3.5 h-3.5 text-sorbe-lemon" fill="currentColor" />
             <span className="text-xs font-medium">{product.rating.toFixed(1)}</span>
             {product.review_count && product.review_count > 0 && (
               <span className="text-xs text-muted-foreground">({product.review_count})</span>

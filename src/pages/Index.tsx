@@ -17,10 +17,10 @@ const flavorCategories = [
 ];
 
 const features = [
-  { icon: IceCream, title: 'Sorbete Artesanal', desc: 'Elaborado con ingredientes frescos y naturales desde 2013', color: 'text-sorbe-primary', bg: 'bg-sorbe-primary/10' },
-  { icon: Truck, title: 'Delivery San Salvador', desc: 'San Jacinto desde $1 · Otras zonas desde $3', color: 'text-sorbe-teal', bg: 'bg-sorbe-teal/10' },
-  { icon: Sparkles, title: '31 Sabores', desc: 'Con leche, naturales, chamoyados, con licor y proteína', color: 'text-sorbe-green', bg: 'bg-sorbe-green/10' },
-  { icon: Users, title: 'Eventos', desc: 'Servicio personalizado para toda ocasión', color: 'text-sorbe-orange', bg: 'bg-sorbe-orange/10' },
+  { icon: IceCream, title: 'Sorbete Artesanal', desc: 'Elaborado con ingredientes frescos y naturales desde 2013', color: 'text-sorbe-strawberry', bg: 'bg-sorbe-strawberry/10' },
+  { icon: Truck, title: 'Delivery San Salvador', desc: 'San Jacinto desde $1 · Otras zonas desde $3', color: 'text-sorbe-mint', bg: 'bg-sorbe-mint/10' },
+  { icon: Sparkles, title: '31 Sabores', desc: 'Con leche, naturales, chamoyados, con licor y proteína', color: 'text-sorbe-lemon', bg: 'bg-sorbe-lemon/10' },
+  { icon: Users, title: 'Eventos', desc: 'Servicio personalizado para toda ocasión', color: 'text-sorbe-raspberry', bg: 'bg-sorbe-raspberry/10' },
 ];
 
 const steps = [
@@ -51,25 +51,25 @@ const Index = () => {
       <Header cartItemsCount={cartCount} />
 
       {/* ── HERO ── */}
-      <section className="relative bg-gradient-to-br from-sorbe-blue via-[#3D2618] to-sorbe-blue text-white py-20 sm:py-28 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-sorbe-chocolate via-[#3D2618] to-sorbe-chocolate text-white py-20 sm:py-28 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 border-2 border-white rounded-full" />
           <div className="absolute bottom-20 right-20 w-48 h-48 border-2 border-white rounded-full" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-white/20 rounded-full" />
         </div>
         <div className="container mx-auto px-4 text-center relative z-10">
-          <p className="text-sorbe-primary font-semibold tracking-[0.2em] uppercase text-sm mb-4">Desde 2013</p>
+          <p className="text-sorbe-strawberry font-semibold tracking-[0.2em] uppercase text-sm mb-4">Desde 2013</p>
           <h1 className="text-6xl sm:text-8xl font-black mb-4">
-            <span className="bg-gradient-to-r from-sorbe-primary via-sorbe-tan to-sorbe-green bg-clip-text text-transparent">Sorbe</span>
+            <span className="bg-gradient-to-r from-sorbe-strawberry via-sorbe-peach to-sorbe-lemon bg-clip-text text-transparent">Sorbe</span>
           </h1>
-          <p className="text-2xl sm:text-3xl font-light text-sorbe-light/80 mb-2">Tu felicidad, nuestra pasión</p>
+          <p className="text-2xl sm:text-3xl font-light text-sorbe-cream/80 mb-2">Tu felicidad, nuestra pasión</p>
           <div className="flex justify-center gap-3 mt-6">
             <span className="bg-white/10 backdrop-blur-sm text-white/90 text-sm px-5 py-2 rounded-full border border-white/10">Sorbete Artesanal</span>
             <span className="bg-white/10 backdrop-blur-sm text-white/90 text-sm px-5 py-2 rounded-full border border-white/10">Delivery San Salvador</span>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
             <button onClick={() => navigate('/products')}
-              className="bg-sorbe-primary hover:bg-sorbe-orange text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105 shadow-xl inline-flex items-center justify-center gap-2">
+              className="bg-sorbe-strawberry hover:bg-sorbe-raspberry text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105 shadow-xl inline-flex items-center justify-center gap-2">
               Ver Sabores <ArrowRight className="w-5 h-5" />
             </button>
             <button onClick={() => navigate('/contacto')}
@@ -126,7 +126,7 @@ const Index = () => {
           <div className="grid sm:grid-cols-3 gap-8">
             {steps.map((s, i) => (
               <div key={i} className="relative">
-                <div className="w-16 h-16 bg-sorbe-primary text-white rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-4">{s.step}</div>
+                <div className="w-16 h-16 bg-sorbe-strawberry text-white rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-4">{s.step}</div>
                 <h3 className="font-bold text-lg mb-1">{s.title}</h3>
                 <p className="text-sm text-muted-foreground">{s.desc}</p>
                 {i < steps.length - 1 && (
@@ -138,34 +138,34 @@ const Index = () => {
             ))}
           </div>
           <button onClick={() => navigate('/products')}
-            className="mt-12 bg-sorbe-primary hover:bg-sorbe-orange text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105 shadow-lg inline-flex items-center gap-2">
+            className="mt-12 bg-sorbe-strawberry hover:bg-sorbe-raspberry text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105 shadow-lg inline-flex items-center gap-2">
             Empezar mi pedido <ArrowRight className="w-5 h-5" />
           </button>
         </div>
       </section>
 
       {/* ── DELIVERY ── */}
-      <section className="py-20 bg-sorbe-blue text-white">
+      <section className="py-20 bg-sorbe-chocolate text-white">
         <div className="container mx-auto px-4 max-w-4xl text-center">
-          <Truck className="w-12 h-12 mx-auto mb-4 text-sorbe-teal" />
+          <Truck className="w-12 h-12 mx-auto mb-4 text-sorbe-mint" />
           <h2 className="text-3xl sm:text-4xl font-black mb-4">Delivery en San Salvador</h2>
-          <p className="text-sorbe-light/70 text-lg mb-10">Llevamos el sabor hasta tu puerta</p>
+          <p className="text-sorbe-cream/70 text-lg mb-10">Llevamos el sabor hasta tu puerta</p>
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 text-left">
               <div className="flex items-center gap-2 mb-3">
-                <MapPin className="w-5 h-5 text-sorbe-primary" />
+                <MapPin className="w-5 h-5 text-sorbe-strawberry" />
                 <h3 className="font-bold text-lg">San Jacinto y alrededores</h3>
               </div>
-              <p className="text-sorbe-light/70">Mínimo $10.00</p>
-              <p className="text-2xl font-bold text-sorbe-teal mt-1">Delivery $1.00</p>
+              <p className="text-sorbe-cream/70">Mínimo $10.00</p>
+              <p className="text-2xl font-bold text-sorbe-mint mt-1">Delivery $1.00</p>
             </div>
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 text-left">
               <div className="flex items-center gap-2 mb-3">
-                <MapPin className="w-5 h-5 text-sorbe-teal" />
+                <MapPin className="w-5 h-5 text-sorbe-mint" />
                 <h3 className="font-bold text-lg">San Salvador</h3>
               </div>
-              <p className="text-sorbe-light/70">Mínimo $35.00</p>
-              <p className="text-2xl font-bold text-sorbe-teal mt-1">Delivery $3.00</p>
+              <p className="text-sorbe-cream/70">Mínimo $35.00</p>
+              <p className="text-2xl font-bold text-sorbe-mint mt-1">Delivery $3.00</p>
             </div>
           </div>
         </div>
@@ -175,16 +175,16 @@ const Index = () => {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="grid sm:grid-cols-2 gap-8">
-            <div className="bg-sorbe-primary/5 rounded-2xl p-8 border border-sorbe-primary/10">
-              <Users className="w-10 h-10 text-sorbe-primary mb-4" />
+            <div className="bg-sorbe-strawberry/5 rounded-2xl p-8 border border-sorbe-strawberry/10">
+              <Users className="w-10 h-10 text-sorbe-strawberry mb-4" />
               <h3 className="text-xl font-bold mb-2">Eventos Especiales</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Atendemos cumpleaños, bodas, eventos corporativos y más con servicio personalizado.
                 Pregunta por nuestros paquetes especiales.
               </p>
             </div>
-            <div className="bg-sorbe-teal/5 rounded-2xl p-8 border border-sorbe-teal/10">
-              <Shield className="w-10 h-10 text-sorbe-teal mb-4" />
+            <div className="bg-sorbe-mint/5 rounded-2xl p-8 border border-sorbe-mint/10">
+              <Shield className="w-10 h-10 text-sorbe-mint mb-4" />
               <h3 className="text-xl font-bold mb-2">Calidad Garantizada</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Todos nuestros productos están elaborados con los más altos estándares higiénicos
@@ -196,14 +196,14 @@ const Index = () => {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section className="py-20 bg-gradient-to-r from-sorbe-primary to-sorbe-orange text-white">
+      <section className="py-20 bg-gradient-to-r from-sorbe-strawberry to-sorbe-raspberry text-white">
         <div className="container mx-auto px-4 text-center">
           <IceCream className="w-12 h-12 mx-auto mb-4 opacity-80" />
           <h2 className="text-3xl sm:text-5xl font-black mb-4">¿Listo para probar el mejor sorbete artesanal?</h2>
           <p className="text-white/80 text-lg mb-8">Pide ahora por WhatsApp o explora nuestros sabores</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="https://wa.me/50379383084" target="_blank" rel="noopener noreferrer"
-              className="bg-white text-sorbe-primary hover:bg-white/90 px-10 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105 shadow-xl inline-flex items-center justify-center gap-2">
+              className="bg-white text-sorbe-strawberry hover:bg-white/90 px-10 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105 shadow-xl inline-flex items-center justify-center gap-2">
               <Phone className="w-5 h-5" /> Pedir por WhatsApp
             </a>
             <button onClick={() => navigate('/products')}

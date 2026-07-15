@@ -58,10 +58,10 @@ const Products = () => {
     <div className="min-h-screen bg-background">
       <Header cartItemsCount={cartCount} />
 
-      <section className="bg-gradient-to-b from-sorbe-blue to-background py-12">
+      <section className="bg-gradient-to-b from-sorbe-chocolate to-background py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">{sabores.length} Sabores</h1>
-          <p className="text-sorbe-light/70 mb-6">Elige tus sabores favoritos y arma tu paquete</p>
+          <p className="text-sorbe-cream/70 mb-6">Elige tus sabores favoritos y arma tu paquete</p>
           <form onSubmit={handleSearch} className="max-w-lg mx-auto">
             <div className="flex items-stretch gap-2 bg-white/10 rounded-xl p-1 border border-white/10">
               <div className="flex items-center px-3 text-white/60"><Search className="w-5 h-5" /></div>

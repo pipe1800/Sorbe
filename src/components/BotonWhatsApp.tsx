@@ -25,7 +25,7 @@ const WhatsAppButton = ({
       aria-label="Chatear por WhatsApp"
     >
       <MessageCircle className="w-6 h-6" />
-      <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white text-sorbe-blue text-sm px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+      <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white text-sorbe-chocolate text-sm px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
         ¿Te ayudamos?
       </span>
       {/* Pulse animation */}

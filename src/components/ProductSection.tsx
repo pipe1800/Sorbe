@@ -36,10 +36,10 @@ const ProductSection = ({ title, products, onLike, seasonal = false }: ProductSe
   const isOfferSection = title.toLowerCase().includes('oferta');
 
   const sectionConfig = isNewSection
-    ? { icon: Sparkles, color: 'text-sorbe-teal', gradient: 'from-sorbe-teal to-sorbe-primary', desc: 'Los sabores más recientes que debes probar' }
+    ? { icon: Sparkles, color: 'text-sorbe-mint', gradient: 'from-sorbe-mint to-sorbe-strawberry', desc: 'Los sabores más recientes que debes probar' }
     : isOfferSection
-    ? { icon: Flame, color: 'text-sorbe-primary', gradient: 'from-sorbe-primary to-sorbe-orange', desc: 'Precios especiales por tiempo limitado' }
-    : { icon: Star, color: 'text-sorbe-green', gradient: 'from-sorbe-green to-sorbe-tan', desc: '' };
+    ? { icon: Flame, color: 'text-sorbe-strawberry', gradient: 'from-sorbe-strawberry to-sorbe-raspberry', desc: 'Precios especiales por tiempo limitado' }
+    : { icon: Star, color: 'text-sorbe-lemon', gradient: 'from-sorbe-lemon to-sorbe-peach', desc: '' };
 
   const Icon = sectionConfig.icon;
 

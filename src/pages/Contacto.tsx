@@ -8,10 +8,10 @@ const Contacto = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <section className="py-20 bg-gradient-to-b from-sorbe-blue to-background text-white">
+      <section className="py-20 bg-gradient-to-b from-sorbe-chocolate to-background text-white">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl sm:text-5xl font-black mb-4">Contáctanos</h1>
-          <p className="text-xl text-sorbe-light/70">Pide tu Sorbe ahora o visítanos</p>
+          <p className="text-xl text-sorbe-cream/70">Pide tu Sorbe ahora o visítanos</p>
         </div>
       </section>
 
@@ -29,8 +29,8 @@ const Contacto = () => {
           {/* Address */}
           <div className="bg-card rounded-2xl p-8 border border-border mb-6">
             <div className="flex items-start gap-4">
-              <div className="bg-sorbe-primary/10 w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-7 h-7 text-sorbe-primary" />
+              <div className="bg-sorbe-strawberry/10 w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-7 h-7 text-sorbe-strawberry" />
               </div>
               <div>
                 <h3 className="text-xl font-bold mb-2">Visítanos</h3>
@@ -66,7 +66,7 @@ const Contacto = () => {
 
           {/* Hours */}
           <div className="mt-8 bg-muted rounded-2xl p-8 text-center">
-            <Store className="w-10 h-10 mx-auto mb-3 text-sorbe-orange" />
+            <Store className="w-10 h-10 mx-auto mb-3 text-sorbe-raspberry" />
             <h3 className="text-xl font-bold mb-2">Horarios de Atención</h3>
             <p className="text-muted-foreground">Abierto todos los días para delivery</p>
             <p className="text-muted-foreground">Contáctanos por WhatsApp para confirmar disponibilidad</p>

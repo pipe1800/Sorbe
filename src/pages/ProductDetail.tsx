@@ -80,7 +80,7 @@ const ProductDetail = () => {
             {/* Package selector */}
             <div className="mb-6">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Package className="w-5 h-5 text-sorbe-primary" /> Tamaño del paquete
+                <Package className="w-5 h-5 text-sorbe-strawberry" /> Tamaño del paquete
               </h3>
               <div className="space-y-2">
                 {paquetes.map(pkg => (

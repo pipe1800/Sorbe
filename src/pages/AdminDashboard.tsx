@@ -70,10 +70,10 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-muted">
       {/* Top bar */}
-      <div className="bg-sorbe-blue text-white p-4">
+      <div className="bg-sorbe-chocolate text-white p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <IceCream className="w-6 h-6 text-sorbe-primary" />
+            <IceCream className="w-6 h-6 text-sorbe-strawberry" />
             <span className="font-bold text-lg">Sorbe Admin</span>
           </div>
           <div className="flex items-center gap-3">
@@ -91,10 +91,10 @@ const AdminDashboard = () => {
         {/* Stats cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { icon: Package, label: 'Productos', value: stats.totalProducts, color: 'text-sorbe-teal' },
-            { icon: ShoppingBag, label: 'Pedidos', value: stats.totalOrders, color: 'text-sorbe-primary' },
-            { icon: DollarSign, label: 'Ingresos', value: `$${stats.revenue.toFixed(2)}`, color: 'text-sorbe-green' },
-            { icon: TrendingUp, label: 'Pendientes', value: stats.pendingOrders, color: 'text-sorbe-orange' },
+            { icon: Package, label: 'Productos', value: stats.totalProducts, color: 'text-sorbe-mint' },
+            { icon: ShoppingBag, label: 'Pedidos', value: stats.totalOrders, color: 'text-sorbe-strawberry' },
+            { icon: DollarSign, label: 'Ingresos', value: `$${stats.revenue.toFixed(2)}`, color: 'text-sorbe-lemon' },
+            { icon: TrendingUp, label: 'Pendientes', value: stats.pendingOrders, color: 'text-sorbe-raspberry' },
           ].map(s => (
             <Card key={s.label}>
               <CardContent className="p-4 flex items-center gap-3">
@@ -126,7 +126,7 @@ const AdminDashboard = () => {
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <h3 className="font-semibold truncate">{p.nombre}</h3>
                         {p.es_temporal && <Badge variant="destructive" className="text-xs">Temporal</Badge>}
-                        {p.is_new && <Badge className="text-xs bg-sorbe-teal text-sorbe-blue">Nuevo</Badge>}
+                        {p.is_new && <Badge className="text-xs bg-sorbe-mint text-sorbe-chocolate">Nuevo</Badge>}
                       </div>
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
                         <span>SKU: {p.sku}</span>

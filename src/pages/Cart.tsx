@@ -69,7 +69,7 @@ const Cart = () => {
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold">{item.nombre}</h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <Package className="w-3.5 h-3.5 text-sorbe-primary" />
+                  <Package className="w-3.5 h-3.5 text-sorbe-strawberry" />
                   <span className="text-sm text-muted-foreground">{item.paquete || 'Sin paquete'}</span>
                 </div>
                 <p className="text-primary font-bold mt-1">${(item.precio * item.quantity).toFixed(2)}</p>
