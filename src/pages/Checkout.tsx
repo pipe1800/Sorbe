@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 type CartItem = {
-  id: string; nombre: string; precio: number; sabores?: string[];
+  id: string; nombre: string; precio: number; paquete?: string; paqueteId?: string;
   image: string; quantity: number;
 };
 
@@ -65,9 +65,8 @@ const Checkout = () => {
     }
 
     // Format order for WhatsApp
-    const flavorList = items.flatMap(i => i.sabores || []).join(', ');
     const itemList = items.map(i =>
-      `• ${i.nombre} x${i.quantity} — $${(i.precio * i.quantity).toFixed(2)}${i.sabores?.length ? ` [${i.sabores.join(', ')}]` : ''}`
+      `• ${i.nombre} (${i.paquete || 'Sin paquete'}) x${i.quantity} — $${(i.precio * i.quantity).toFixed(2)}`
     ).join('\n');
 
     const message = encodeURIComponent(
@@ -83,7 +82,7 @@ const Checkout = () => {
       `*Delivery:* $${deliveryCost.toFixed(2)}\n` +
       `*Total:* $${total.toFixed(2)}\n\n` +
       `${notas ? `*Notas:* ${notas}\n\n` : ''}` +
-      `*Sabores:* ${flavorList || 'Por definir'}`
+      `*Sabores:* ${items.map(i => i.nombre).join(', ')}`
     );
 
     window.open(`https://wa.me/50379383084?text=${message}`, '_blank');
@@ -110,12 +109,9 @@ const Checkout = () => {
             {items.map(item => (
               <div key={item.id} className="mb-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="font-medium">{item.nombre} x{item.quantity}</span>
+                  <span className="font-medium">{item.nombre} ({item.paquete}) x{item.quantity}</span>
                   <span>${(item.precio * item.quantity).toFixed(2)}</span>
                 </div>
-                {item.sabores && item.sabores.length > 0 && (
-                  <p className="text-xs text-muted-foreground mt-0.5">Sabores: {item.sabores.join(', ')}</p>
-                )}
               </div>
             ))}
             <div className="border-t border-border mt-4 pt-4 space-y-1 text-sm">
