@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Snowfall from '@/components/Snowfall';
 import {
   IceCream, Truck, MapPin, Star, ArrowRight, Milk, Apple, Flame, Wine,
   Dumbbell, Users, Shield, Sparkles, Phone, Clock, ChevronRight,
@@ -61,6 +62,7 @@ const Index = () => {
           <IceCream className="absolute bottom-16 left-1/4 w-36 h-36 text-white/15 -rotate-12" />
           <IceCream className="absolute top-32 left-10 w-16 h-16 text-white/15 rotate-45" />
           <IceCream className="absolute bottom-8 right-1/3 w-24 h-24 text-white/20 -rotate-6" />
+          <Snowfall />
         </div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <p className="text-sorbe-strawberry font-semibold tracking-[0.2em] uppercase text-sm mb-6">Desde 2013</p>
