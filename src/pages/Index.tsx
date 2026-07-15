@@ -59,7 +59,7 @@ const Index = () => {
         </div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <p className="text-sorbe-strawberry font-semibold tracking-[0.2em] uppercase text-sm mb-6">Desde 2013</p>
-          <img src="/logo-circular.png" alt="Sorbe" className="w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 drop-shadow-xl" />
+          <img src="/logo-texto.png" alt="Sorbe" className="h-12 sm:h-16 mx-auto mb-4 drop-shadow-xl" />
           <p className="text-2xl sm:text-3xl font-light text-sorbe-cream/80 mb-2">Tu felicidad, nuestra pasión</p>
           <div className="flex justify-center gap-3 mt-6">
             <span className="bg-white/10 backdrop-blur-sm text-white/90 text-sm px-5 py-2 rounded-full border border-white/10">Sorbete Artesanal</span>

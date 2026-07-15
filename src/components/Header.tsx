@@ -129,8 +129,9 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
           </nav>
 
           {/* Logo */}
-          <button onClick={() => navigate('/')} className="flex items-center hover:opacity-80 transition-opacity">
-            <img src="/logo-texto.png" alt="Sorbe" className="h-8 sm:h-10" />
+          <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <img src="/logo-cono.png" alt="Sorbe" className="w-8 h-8 sm:w-10 sm:h-10" />
+            <img src="/logo-texto.png" alt="Sorbe" className="h-7 sm:h-9" />
           </button>
 
           {/* Cart */}
