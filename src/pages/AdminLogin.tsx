@@ -50,7 +50,7 @@ const AdminLogin = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="admin@caceresvideogames.com"
+                placeholder="admin@sorbe.com"
               />
             </div>
             <div>

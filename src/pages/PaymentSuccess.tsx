@@ -42,37 +42,18 @@ const PaymentSuccess = () => {
   const retryDelay = 2000;
 
   useEffect(() => {
-    // Log all URL parameters to understand what WOMPI sends
-    console.log('Full URL:', window.location.href);
-    console.log('Search params:', window.location.search);
-    console.log('All search params:', Object.fromEntries(searchParams.entries()));
-    
     checkPaymentStatus();
   }, [searchParams]);
 
   const checkPaymentStatus = async () => {
     try {
-      // WOMPI sends back these specific parameters
       const wompiReference = searchParams.get('identificadorEnlaceComercio');
       const wompiTransactionId = searchParams.get('idTransaccion');
       const wompiLinkId = searchParams.get('idEnlace');
       const wompiAmount = searchParams.get('monto');
       const wompiHash = searchParams.get('hash');
-      
-      console.log('WOMPI parameters received:', {
-        wompiReference,
-        wompiTransactionId,
-        wompiLinkId,
-        wompiAmount,
-        wompiHash,
-        allParams: Object.fromEntries(searchParams.entries())
-      });
 
-      // Get stored reference from localStorage as fallback
       const storedReference = localStorage.getItem('currentOrderReference');
-      console.log('Stored reference from localStorage:', storedReference);
-      
-      // Use WOMPI reference if available, otherwise use stored reference
       const orderReference = wompiReference || storedReference;
       
       if (!orderReference) {
@@ -82,8 +63,6 @@ const PaymentSuccess = () => {
       }
 
       // First, try to find the order in the database
-      console.log('Looking for order with reference:', orderReference);
-      
       let order = null;
       
       // Try both payment_reference and wompi_reference
@@ -91,8 +70,6 @@ const PaymentSuccess = () => {
         .from('orders')
         .select('*')
         .eq('payment_reference', orderReference);
-      
-      console.log('Payment reference orders:', paymentRefOrders, 'Error:', paymentRefError);
       
       if (paymentRefOrders && paymentRefOrders.length > 0) {
         order = paymentRefOrders[0];
@@ -103,8 +80,6 @@ const PaymentSuccess = () => {
           .from('orders')
           .select('*')
           .eq('wompi_reference', orderReference);
-        
-        console.log('Wompi reference orders:', wompiRefOrders, 'Error:', wompiRefError);
         
         if (wompiRefOrders && wompiRefOrders.length > 0) {
           order = wompiRefOrders[0];
@@ -118,23 +93,15 @@ const PaymentSuccess = () => {
 
       // If we have a WOMPI transaction ID, check the payment status directly with WOMPI
       if (wompiTransactionId) {
-        console.log('Checking payment status with WOMPI for transaction:', wompiTransactionId);
-        
         try {
           const { data: wompiStatus, error: wompiError } = await supabase.functions.invoke('check-payment-status', {
             body: { transactionId: wompiTransactionId },
           });
 
-          console.log('WOMPI status response:', wompiStatus, 'Error:', wompiError);
-
           if (!wompiError && wompiStatus) {
-            // Use the normalized status returned by the edge function
             const paymentStatus = wompiStatus.status;
             const isApproved = wompiStatus.isApproved;
             
-            console.log('WOMPI payment status:', paymentStatus, 'Is Approved:', isApproved);
-            
-            // Check if payment is approved
             if (paymentStatus === 'APPROVED' || isApproved === true) {
               // Update the order status in the database
               const { error: updateError } = await supabase
@@ -159,8 +126,7 @@ const PaymentSuccess = () => {
               setStatus('error');
               return;
             } else if (paymentStatus === 'PENDING') {
-              // Payment is still pending, continue checking
-              console.log('Payment still pending from WOMPI');
+              // Continue checking
             }
           }
         } catch (error) {
@@ -185,7 +151,6 @@ const PaymentSuccess = () => {
         
         // If still pending/processing, retry
         if (retryCount < maxRetries) {
-          console.log('Payment still processing, retrying...');
           setRetryCount(prev => prev + 1);
           setTimeout(() => checkPaymentStatus(), retryDelay);
           return;

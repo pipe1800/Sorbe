@@ -199,15 +199,11 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
             className="flex items-center gap-3 sm:gap-4 hover:opacity-80 transition-opacity"
           >
             <img 
-              src="/lovable-uploads/6a8f9e46-cf47-49c9-b982-fc84228181bf.png" 
-              alt="Cáceres Videogames Control" 
+              src="/placeholder.svg" 
+              alt="Sorbe" 
               className="w-10 h-10 sm:w-12 sm:h-12"
             />
-            <img 
-              src="/lovable-uploads/738b26e7-e66e-49ac-9cde-fc416ecf361e.png" 
-              alt="Cáceres Videogames" 
-              className="h-6 sm:h-8"
-            />
+            <span className="text-white font-bold text-xl sm:text-2xl">Sorbe</span>
           </button>
 
           {/* Cart */}
