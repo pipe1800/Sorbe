@@ -68,10 +68,12 @@ const Index = () => {
   };
 
   const handleLike = async (id: string) => {
-    const { error } = await supabase.rpc('increment_likes', { product_id: id });
+    const { data: prod } = await supabase.from('products').select('likes_count').eq('id', id).single();
+    const newCount = (prod?.likes_count || 0) + 1;
+    const { error } = await supabase.from('products').update({ likes_count: newCount }).eq('id', id);
     if (!error) {
-      setNewProducts(prev => prev.map(p => p.id === id ? { ...p, likes_count: (p.likes_count || 0) + 1 } : p));
-      setSaleProducts(prev => prev.map(p => p.id === id ? { ...p, likes_count: (p.likes_count || 0) + 1 } : p));
+      setNewProducts(prev => prev.map(p => p.id === id ? { ...p, likes_count: newCount } : p));
+      setSaleProducts(prev => prev.map(p => p.id === id ? { ...p, likes_count: newCount } : p));
     }
   };
 

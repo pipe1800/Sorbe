@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,355 +7,197 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ImageUpload from '@/components/admin/ImageUpload';
-import BulkProductUpload from '@/components/admin/BulkProductUpload';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus, X } from 'lucide-react';
 
-type CategoryRow = {
-  id: string;
-  name: string;
-  slug: string | null;
-  parent_id: string | null;
-};
+type CategoryRow = { id: string; nombre: string; slug: string };
+
+const FLAVOR_OPTIONS = ['frutal', 'cremoso', 'chocolate', 'citrico', 'tropical', 'herbal'];
+const DIET_OPTIONS = ['vegano', 'sin_gluten', 'sin_azucar', 'sin_lactosa'];
 
 const AdminAddProduct: React.FC = () => {
   const navigate = useNavigate();
   const { admin } = useAdmin();
 
-  useEffect(() => {
-    if (!admin) navigate('/admin');
-  }, [admin, navigate]);
+  useEffect(() => { if (!admin) navigate('/admin'); }, [admin, navigate]);
 
   const [formData, setFormData] = useState({
-    sku: '',
-    name: '',
-    description: '',
-    price: '',
-    originalPrice: '',
-    isNew: false,
-    isOnSale: false,
-    stockCount: '',
-    features: ''
+    sku: '', nombre: '', descripcion: '', precio: '', precio_original: '',
+    ingredientes: '', stock_count: '50', es_temporal: false, is_new: false, is_on_sale: false,
   });
+  const [perfilSabor, setPerfilSabor] = useState<string[]>([]);
+  const [infoDietetica, setInfoDietetica] = useState<Record<string, boolean>>({});
+  const [tallas, setTallas] = useState<{ nombre: string; modificador_precio: number }[]>([
+    { nombre: 'Chico', modificador_precio: 0 },
+  ]);
+  const [alergenos, setAlergenos] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<CategoryRow[]>([]);
-  const [parentCategoryId, setParentCategoryId] = useState('');
-  const [childCategoryId, setChildCategoryId] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const loadCategories = async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('id,name,slug,parent_id,is_active')
-        .eq('is_active', true)
-        .order('parent_id', { ascending: true })
-        .order('sort_order', { ascending: true })
-        .order('name', { ascending: true });
-      if (!error && data) setCategories(data as CategoryRow[]);
-    };
-    loadCategories();
+    supabase.from('categories').select('id,nombre,slug').eq('is_active', true).then(({ data }) => setCategories(data || []));
   }, []);
 
-  const parentOptions = useMemo(() => categories.filter((c) => !c.parent_id), [categories]);
-  const childOptions = useMemo(
-    () => categories.filter((c) => c.parent_id === parentCategoryId),
-    [categories, parentCategoryId]
-  );
+  const toggleFlavor = (f: string) => setPerfilSabor(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
+  const toggleDiet = (d: string) => setInfoDietetica(prev => ({ ...prev, [d]: !prev[d] }));
 
-  const getPrimaryConsole = (labels: string[]): string => {
-    const consoles = [
-      'Nintendo Switch',
-      'PlayStation 5',
-      'PlayStation 4',
-      'Xbox Series X',
-      'Xbox One',
-      'PC'
-    ];
-    const found = labels.find((label) => consoles.includes(label));
-    return found || '';
-  };
-
-  const resetForm = () => {
-    setFormData({
-      sku: '',
-      name: '',
-      description: '',
-      price: '',
-      originalPrice: '',
-      isNew: false,
-      isOnSale: false,
-      stockCount: '',
-      features: ''
-    });
-    setImageUrls([]);
-    setParentCategoryId('');
-    setChildCategoryId('');
+  const addTalla = () => setTallas(prev => [...prev, { nombre: '', modificador_precio: 0 }]);
+  const removeTalla = (i: number) => setTallas(prev => prev.filter((_, idx) => idx !== i));
+  const updateTalla = (i: number, field: string, value: string | number) => {
+    setTallas(prev => prev.map((t, idx) => idx === i ? { ...t, [field]: value } : t));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.nombre || !formData.precio || !formData.sku) return;
     setIsLoading(true);
 
-    try {
-      if (!childCategoryId) throw new Error('Selecciona una categoría hija.');
-      const resolvedChild = categories.find((c) => c.id === childCategoryId);
-      if (!resolvedChild) throw new Error('No se encontró la categoría hija seleccionada.');
-      const resolvedParentId = resolvedChild.parent_id;
-      if (!resolvedParentId) throw new Error('La categoría hija seleccionada no tiene categoría padre.');
-      const resolvedParent = categories.find((c) => c.id === resolvedParentId);
-      if (!resolvedParent) throw new Error('No se encontró la categoría padre correspondiente.');
+    const { error } = await supabase.from('products').insert({
+      sku: formData.sku,
+      nombre: formData.nombre,
+      descripcion: formData.descripcion,
+      precio: parseFloat(formData.precio),
+      precio_original: formData.precio_original ? parseFloat(formData.precio_original) : null,
+      perfil_sabor: perfilSabor,
+      info_dietetica: infoDietetica,
+      opciones_talla: tallas.filter(t => t.nombre),
+      es_temporal: formData.es_temporal,
+      alergenos: alergenos ? alergenos.split(',').map(s => s.trim()) : [],
+      ingredientes: formData.ingredientes,
+      is_new: formData.is_new,
+      is_on_sale: formData.is_on_sale,
+      in_stock: true,
+      stock_count: parseInt(formData.stock_count) || 0,
+      image_urls: imageUrls,
+    });
 
-      if (imageUrls.length === 0) throw new Error('Debes subir al menos una imagen.');
-
-      const priceValue = parseFloat(formData.price || '0');
-      if (Number.isNaN(priceValue) || priceValue <= 0) throw new Error('Ingresa un precio válido.');
-
-      const originalPriceValue = formData.originalPrice ? parseFloat(formData.originalPrice) : null;
-      if (formData.originalPrice && Number.isNaN(originalPriceValue || undefined)) throw new Error('Ingresa un precio original válido.');
-
-      const stockValue = parseInt(formData.stockCount || '0', 10);
-      if (Number.isNaN(stockValue) || stockValue < 0) throw new Error('Ingresa una cantidad de stock válida.');
-
-      const featuresArray = formData.features
-        .split('\n')
-        .map((feature) => feature.trim())
-        .filter((feature) => feature.length > 0);
-
-      const categoryLabels = [resolvedParent.name, resolvedChild.name];
-      const primaryConsole = getPrimaryConsole(categoryLabels);
-
-      const { error } = await supabase
-        .from('products')
-        .insert({
-          sku: formData.sku,
-          name: formData.name,
-          description: formData.description,
-          price: priceValue,
-          original_price: originalPriceValue,
-          console: primaryConsole,
-          category_id: resolvedChild.id,
-          parent_category_id: resolvedParent.id,
-          is_new: formData.isNew,
-          is_on_sale: formData.isOnSale,
-          stock_count: stockValue,
-          in_stock: stockValue > 0,
-          image_urls: imageUrls,
-          features: featuresArray,
-          rating: 0,
-          review_count: 0,
-          likes_count: 0
-        });
-
-      if (error) throw error;
-
-      resetForm();
-      navigate('/admin/dashboard?tab=products');
-    } catch (err) {
-      console.error('Error adding product:', err);
-      alert(err instanceof Error ? err.message : 'Error al agregar el producto');
-    } finally {
-      setIsLoading(false);
+    if (error) {
+      alert('Error: ' + error.message);
+    } else {
+      navigate('/admin/dashboard');
     }
+    setIsLoading(false);
   };
 
-  const childSelectDisabled = !parentCategoryId;
+  if (!admin) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/admin/dashboard?tab=products')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Volver
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-muted p-6">
+      <div className="max-w-3xl mx-auto">
+        <button onClick={() => navigate('/admin/dashboard')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+          <ArrowLeft className="w-4 h-4" /> Volver al dashboard
+        </button>
 
-      <main className="w-full px-4 sm:px-6 lg:px-8 py-6">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Agregar Producto</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="individual" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="individual">Producto Individual</TabsTrigger>
-                <TabsTrigger value="bulk">Carga Masiva (CSV/Excel)</TabsTrigger>
-              </TabsList>
+        <h1 className="text-3xl font-bold mb-8">Agregar Producto</h1>
 
-              <TabsContent value="individual" className="w-full">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="sku">SKU</Label>
-                      <Input
-                        id="sku"
-                        value={formData.sku}
-                        onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                        required
-                      />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic info */}
+          <Card>
+            <CardHeader><CardTitle>Información Básica</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>SKU *</Label><Input value={formData.sku} onChange={e => setFormData(p => ({ ...p, sku: e.target.value }))} placeholder="SOR-XXX-001" required /></div>
+                <div><Label>Nombre *</Label><Input value={formData.nombre} onChange={e => setFormData(p => ({ ...p, nombre: e.target.value }))} placeholder="Paleta de..." required /></div>
+              </div>
+              <div><Label>Descripción</Label><Textarea value={formData.descripcion} onChange={e => setFormData(p => ({ ...p, descripcion: e.target.value }))} rows={3} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Precio *</Label><Input type="number" step="0.01" value={formData.precio} onChange={e => setFormData(p => ({ ...p, precio: e.target.value }))} placeholder="2.50" required /></div>
+                <div><Label>Precio Original</Label><Input type="number" step="0.01" value={formData.precio_original} onChange={e => setFormData(p => ({ ...p, precio_original: e.target.value }))} placeholder="3.00" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Stock</Label><Input type="number" value={formData.stock_count} onChange={e => setFormData(p => ({ ...p, stock_count: e.target.value }))} /></div>
+                <div><Label>Categoría</Label>
+                  <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)} className="w-full border rounded-lg px-3 py-2 bg-background">
+                    <option value="">Seleccionar...</option>
+                    {categories.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-6">
+                <div className="flex items-center gap-2"><Switch checked={formData.is_new} onCheckedChange={v => setFormData(p => ({ ...p, is_new: v }))} /><Label>Nuevo</Label></div>
+                <div className="flex items-center gap-2"><Switch checked={formData.is_on_sale} onCheckedChange={v => setFormData(p => ({ ...p, is_on_sale: v }))} /><Label>En Oferta</Label></div>
+                <div className="flex items-center gap-2"><Switch checked={formData.es_temporal} onCheckedChange={v => setFormData(p => ({ ...p, es_temporal: v }))} /><Label>Temporal</Label></div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Flavor + Dietary */}
+          <Card>
+            <CardHeader><CardTitle>Perfil de Sabor & Dieta</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="mb-2 block">Perfil de Sabor</Label>
+                <div className="flex flex-wrap gap-2">
+                  {FLAVOR_OPTIONS.map(f => (
+                    <button key={f} type="button" onClick={() => toggleFlavor(f)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${perfilSabor.includes(f) ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted border-border hover:border-primary/50'}`}>
+                      {f}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label className="mb-2 block">Información Dietética</Label>
+                <div className="flex flex-wrap gap-2">
+                  {DIET_OPTIONS.map(d => (
+                    <button key={d} type="button" onClick={() => toggleDiet(d)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${infoDietetica[d] ? 'bg-sorbe-mint text-sorbe-chocolate border-sorbe-mint' : 'bg-muted border-border hover:border-sorbe-mint/50'}`}>
+                      {d.replace('_', ' ')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Alérgenos (separados por coma)</Label>
+                <Input value={alergenos} onChange={e => setAlergenos(e.target.value)} placeholder="lacteos, nueces, huevo" />
+              </div>
+              <div>
+                <Label>Ingredientes</Label>
+                <Textarea value={formData.ingredientes} onChange={e => setFormData(p => ({ ...p, ingredientes: e.target.value }))} rows={2} placeholder="Leche entera, azúcar, vainilla..." />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tallas */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Opciones de Talla</CardTitle>
+              <Button type="button" variant="outline" size="sm" onClick={addTalla}><Plus className="w-4 h-4 mr-1" /> Agregar</Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {tallas.map((t, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Input value={t.nombre} onChange={e => updateTalla(i, 'nombre', e.target.value)} placeholder="Chico / Mediano / Grande" className="flex-1" />
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground text-sm">+$</span>
+                      <Input type="number" step="0.01" value={t.modificador_precio} onChange={e => updateTalla(i, 'modificador_precio', parseFloat(e.target.value) || 0)} className="w-20" />
                     </div>
-                    <div>
-                      <Label htmlFor="name">Nombre</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        required
-                      />
-                    </div>
+                    {tallas.length > 1 && (
+                      <Button type="button" variant="ghost" size="icon" onClick={() => removeTalla(i)}><X className="w-4 h-4" /></Button>
+                    )}
                   </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-                  <div>
-                    <Label htmlFor="description">Descripción</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      rows={3}
-                    />
-                  </div>
+          {/* Images */}
+          <Card>
+            <CardHeader><CardTitle>Imágenes</CardTitle></CardHeader>
+            <CardContent>
+              <ImageUpload images={imageUrls} onChange={setImageUrls} />
+            </CardContent>
+          </Card>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="price">Precio ($)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        step="0.01"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="originalPrice">Precio Original ($)</Label>
-                      <Input
-                        id="originalPrice"
-                        type="number"
-                        step="0.01"
-                        value={formData.originalPrice}
-                        onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="parentCategory">Categoría Padre</Label>
-                      <select
-                        id="parentCategory"
-                        className="w-full border rounded-md px-3 py-2 text-sm"
-                        value={parentCategoryId}
-                        onChange={(e) => {
-                          setParentCategoryId(e.target.value);
-                          setChildCategoryId('');
-                        }}
-                        required
-                      >
-                        <option value="">Selecciona una categoría padre</option>
-                        {parentOptions.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <Label htmlFor="childCategory">Categoría Hija</Label>
-                      <select
-                        id="childCategory"
-                        className="w-full border rounded-md px-3 py-2 text-sm"
-                        value={childCategoryId}
-                        onChange={(e) => setChildCategoryId(e.target.value)}
-                        required
-                        disabled={childSelectDisabled}
-                      >
-                        <option value="">{childSelectDisabled ? 'Selecciona primero una categoría padre' : 'Selecciona una categoría hija'}</option>
-                        {childOptions.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="stockCount">Cantidad en Stock</Label>
-                    <Input
-                      id="stockCount"
-                      type="number"
-                      value={formData.stockCount}
-                      onChange={(e) => setFormData({ ...formData, stockCount: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="isNew"
-                        checked={formData.isNew}
-                        onCheckedChange={(checked) => setFormData({ ...formData, isNew: checked })}
-                      />
-                      <Label htmlFor="isNew">Producto Nuevo</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="isOnSale"
-                        checked={formData.isOnSale}
-                        onCheckedChange={(checked) => setFormData({ ...formData, isOnSale: checked })}
-                      />
-                      <Label htmlFor="isOnSale">En Oferta</Label>
-                    </div>
-                  </div>
-
-                  <ImageUpload images={imageUrls} onImagesChange={setImageUrls} />
-
-                  <div>
-                    <Label htmlFor="features">Características (una por línea)</Label>
-                    <Textarea
-                      id="features"
-                      value={formData.features}
-                      onChange={(e) => setFormData({ ...formData, features: e.target.value })}
-                      placeholder={'Gráficos impresionantes\nHistoria envolvente\nMultijugador online'}
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => navigate('/admin/dashboard?tab=products')}
-                      className="w-full sm:w-auto"
-                    >
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-                      {isLoading ? 'Agregando...' : 'Agregar Producto'}
-                    </Button>
-                  </div>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="bulk" className="w-full">
-                <BulkProductUpload onProductsProcessed={() => navigate('/admin/dashboard?tab=products')} />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </main>
+          <Button type="submit" disabled={isLoading} className="w-full py-6 text-lg">
+            {isLoading ? 'Guardando...' : 'Crear Producto'}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 };
