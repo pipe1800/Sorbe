@@ -51,7 +51,7 @@ const Index = () => {
       <Header cartItemsCount={cartCount} />
 
       {/* ── HERO ── */}
-      <section className="relative bg-gradient-to-br from-sorbe-blue via-[#3D2618] to-sorbe-blue text-white py-20 sm:py-28 overflow-hidden">
+      <section className="relative bg-sorbe-teal text-white py-20 sm:py-28 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 border-2 border-white rounded-full" />
           <div className="absolute bottom-20 right-20 w-48 h-48 border-2 border-white rounded-full" />
@@ -98,11 +98,11 @@ const Index = () => {
       </section>
 
       {/* ── FLAVOR CATEGORIES ── */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-sorbe-green text-white">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-black mb-2">{totalFlavors} Sabores Artesanales</h2>
-            <p className="text-muted-foreground text-lg">Cinco categorías para todos los gustos</p>
+            <p className="text-white/80 text-lg">Cinco categorías para todos los gustos</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {flavorCategories.map(cat => (
