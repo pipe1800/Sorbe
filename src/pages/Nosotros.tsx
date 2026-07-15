@@ -10,8 +10,8 @@ const Nosotros = () => {
 
       <section className="py-20 bg-gradient-to-b from-sorbe-chocolate to-background text-white">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sorbe-strawberry font-semibold tracking-wider uppercase mb-2">Desde 2013</p>
-          <h1 className="text-4xl sm:text-5xl font-black mb-4">Sorbe</h1>
+          <p className="text-sorbe-strawberry font-semibold tracking-wider uppercase mb-4">Desde 2013</p>
+          <img src="/logo-texto.png" alt="Sorbe" className="h-10 sm:h-14 mx-auto mb-4" />
           <p className="text-xl text-sorbe-cream/70">Tu felicidad, nuestra pasión</p>
           <p className="text-sorbe-mint mt-4">Sorbete Artesanal • Delivery San Salvador</p>
         </div>

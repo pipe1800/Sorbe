@@ -58,10 +58,8 @@ const Index = () => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-white/20 rounded-full" />
         </div>
         <div className="container mx-auto px-4 text-center relative z-10">
-          <p className="text-sorbe-strawberry font-semibold tracking-[0.2em] uppercase text-sm mb-4">Desde 2013</p>
-          <h1 className="text-6xl sm:text-8xl font-black mb-4">
-            <span className="bg-gradient-to-r from-sorbe-strawberry via-sorbe-peach to-sorbe-lemon bg-clip-text text-transparent">Sorbe</span>
-          </h1>
+          <p className="text-sorbe-strawberry font-semibold tracking-[0.2em] uppercase text-sm mb-6">Desde 2013</p>
+          <img src="/logo-circular.png" alt="Sorbe" className="w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4 drop-shadow-xl" />
           <p className="text-2xl sm:text-3xl font-light text-sorbe-cream/80 mb-2">Tu felicidad, nuestra pasión</p>
           <div className="flex justify-center gap-3 mt-6">
             <span className="bg-white/10 backdrop-blur-sm text-white/90 text-sm px-5 py-2 rounded-full border border-white/10">Sorbete Artesanal</span>

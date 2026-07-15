@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Phone, MapPin, Menu, Search, IceCream } from 'lucide-react';
+import { ShoppingCart, Phone, MapPin, Menu, Search } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -129,9 +129,8 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
           </nav>
 
           {/* Logo */}
-          <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <IceCream className="w-8 h-8 sm:w-10 sm:h-10 text-sorbe-strawberry" />
-            <span className="text-white font-bold text-xl sm:text-2xl">Sorbe</span>
+          <button onClick={() => navigate('/')} className="flex items-center hover:opacity-80 transition-opacity">
+            <img src="/logo-texto.png" alt="Sorbe" className="h-8 sm:h-10" />
           </button>
 
           {/* Cart */}
