@@ -8,12 +8,12 @@ const Nosotros = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <section className="py-20 bg-gradient-to-b from-sorbe-chocolate to-background text-white">
+      <section className="py-20 bg-gradient-to-b from-sorbe-blue to-background text-white">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sorbe-strawberry font-semibold tracking-wider uppercase mb-2">Desde 2013</p>
+          <p className="text-sorbe-primary font-semibold tracking-wider uppercase mb-2">Desde 2013</p>
           <h1 className="text-4xl sm:text-5xl font-black mb-4">Sorbe</h1>
-          <p className="text-xl text-sorbe-cream/70">Tu felicidad, nuestra pasión</p>
-          <p className="text-sorbe-mint mt-4">Sorbete Artesanal • Delivery San Salvador</p>
+          <p className="text-xl text-sorbe-light/70">Tu felicidad, nuestra pasión</p>
+          <p className="text-sorbe-teal mt-4">Sorbete Artesanal • Delivery San Salvador</p>
         </div>
       </section>
 
@@ -21,7 +21,7 @@ const Nosotros = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-card rounded-2xl p-8 border border-border">
-              <Heart className="w-10 h-10 text-sorbe-strawberry mb-4" />
+              <Heart className="w-10 h-10 text-sorbe-primary mb-4" />
               <h2 className="text-2xl font-bold mb-4">Nuestra Historia</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Desde 2013, Sorbe ha sido sinónimo de sorbete artesanal de calidad en El Salvador.
@@ -31,11 +31,11 @@ const Nosotros = () => {
             </div>
 
             <div className="bg-card rounded-2xl p-8 border border-border">
-              <Store className="w-10 h-10 text-sorbe-mint mb-4" />
+              <Store className="w-10 h-10 text-sorbe-teal mb-4" />
               <h2 className="text-2xl font-bold mb-4">Visítanos</h2>
               <div className="space-y-3 text-muted-foreground">
                 <div className="flex items-start gap-2">
-                  <MapPin className="w-5 h-5 text-sorbe-strawberry flex-shrink-0 mt-0.5" />
+                  <MapPin className="w-5 h-5 text-sorbe-primary flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="font-medium text-foreground">Dirección</p>
                     <p>Avenida Dario Gonzales 731, Barrio San Jacinto</p>
@@ -47,7 +47,7 @@ const Nosotros = () => {
             </div>
 
             <div className="bg-card rounded-2xl p-8 border border-border">
-              <Clock className="w-10 h-10 text-sorbe-lemon mb-4" />
+              <Clock className="w-10 h-10 text-sorbe-green mb-4" />
               <h2 className="text-2xl font-bold mb-4">Eventos</h2>
               <p className="text-muted-foreground leading-relaxed">
                 Atendemos todo tipo de eventos con servicio personalizado.
@@ -57,12 +57,12 @@ const Nosotros = () => {
             </div>
 
             <div className="bg-card rounded-2xl p-8 border border-border">
-              <Phone className="w-10 h-10 text-sorbe-raspberry mb-4" />
+              <Phone className="w-10 h-10 text-sorbe-orange mb-4" />
               <h2 className="text-2xl font-bold mb-4">Contáctanos</h2>
               <div className="space-y-2 text-muted-foreground">
                 <p>Pedidos por WhatsApp</p>
                 <a href="https://wa.me/50379383084" target="_blank" rel="noopener noreferrer"
-                  className="text-sorbe-mint hover:underline font-medium text-lg">+503 7938 3084</a>
+                  className="text-sorbe-teal hover:underline font-medium text-lg">+503 7938 3084</a>
               </div>
             </div>
           </div>

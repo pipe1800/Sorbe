@@ -46,12 +46,12 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
   ];
 
   return (
-    <header className="bg-sorbe-chocolate text-white shadow-lg">
+    <header className="bg-sorbe-blue text-white shadow-lg">
       {/* Top bar */}
-      <div className="bg-sorbe-strawberry/90 py-1.5 hidden md:block">
+      <div className="bg-sorbe-primary/90 py-1.5 hidden md:block">
         <div className="container mx-auto px-4 flex justify-between items-center text-xs sm:text-sm">
           <div className="flex items-center gap-4">
-            <a href="https://wa.me/503" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-sorbe-cream transition-colors">
+            <a href="https://wa.me/503" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-sorbe-light transition-colors">
               <Phone className="w-3.5 h-3.5" /> WhatsApp
             </a>
             <span className="flex items-center gap-1">
@@ -115,7 +115,7 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
               <button className="text-white/80 hover:text-white font-medium transition-colors flex items-center gap-1">
                 Categorías <svg className="w-3 h-3" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" /></svg>
               </button>
-              <div className="absolute top-full left-0 mt-2 bg-white text-sorbe-chocolate rounded-xl shadow-xl p-4 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <div className="absolute top-full left-0 mt-2 bg-white text-sorbe-blue rounded-xl shadow-xl p-4 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                 {categories.map((cat) => (
                   <div key={cat.name} className="mb-3 last:mb-0">
                     <button onClick={() => handleCategoryClick(cat.name)} className="font-semibold text-sm hover:text-primary w-full text-left">{cat.name}</button>
@@ -130,7 +130,7 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
 
           {/* Logo */}
           <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <IceCream className="w-8 h-8 sm:w-10 sm:h-10 text-sorbe-strawberry" />
+            <IceCream className="w-8 h-8 sm:w-10 sm:h-10 text-sorbe-primary" />
             <span className="text-white font-bold text-xl sm:text-2xl">Sorbe</span>
           </button>
 

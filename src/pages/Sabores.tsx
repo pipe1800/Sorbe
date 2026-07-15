@@ -33,10 +33,10 @@ const Sabores = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <section className="py-16 bg-gradient-to-b from-sorbe-chocolate to-background text-white">
+      <section className="py-16 bg-gradient-to-b from-sorbe-blue to-background text-white">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl sm:text-5xl font-black mb-2">{total} Sabores</h1>
-          <p className="text-xl text-sorbe-cream/70">Todos nuestros sorbetes están hechos con ingredientes de la más alta calidad</p>
+          <p className="text-xl text-sorbe-light/70">Todos nuestros sorbetes están hechos con ingredientes de la más alta calidad</p>
         </div>
       </section>
 

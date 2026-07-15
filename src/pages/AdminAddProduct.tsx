@@ -144,7 +144,7 @@ const AdminAddProduct: React.FC = () => {
                 <div className="flex flex-wrap gap-2">
                   {DIET_OPTIONS.map(d => (
                     <button key={d} type="button" onClick={() => toggleDiet(d)}
-                      className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${infoDietetica[d] ? 'bg-sorbe-mint text-sorbe-chocolate border-sorbe-mint' : 'bg-muted border-border hover:border-sorbe-mint/50'}`}>
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${infoDietetica[d] ? 'bg-sorbe-teal text-sorbe-blue border-sorbe-teal' : 'bg-muted border-border hover:border-sorbe-teal/50'}`}>
                       {d.replace('_', ' ')}
                     </button>
                   ))}
