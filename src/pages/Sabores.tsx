@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
-import { Milk, Apple, Flame, Wine } from 'lucide-react';
+import { Milk, Apple, Flame, Wine, Dumbbell } from 'lucide-react';
 
 type Sabor = { id: string; nombre: string; categoria: string; descripcion?: string };
 

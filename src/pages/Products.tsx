@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Package, Search, Milk, Apple, Flame, Wine } from 'lucide-react';
+import { Package, Search, Milk, Apple, Flame, Wine, Dumbbell } from 'lucide-react';
 
 type Paquete = {
   id: string; sku: string; nombre: string; descripcion?: string;
@@ -19,6 +19,7 @@ const flavorCategories = [
   { key: 'naturales', label: 'Naturales', icon: Apple, color: 'text-green-600 bg-green-50' },
   { key: 'chamoyados', label: 'Chamoyados', icon: Flame, color: 'text-red-600 bg-red-50' },
   { key: 'con_licor', label: 'Con Licor', icon: Wine, color: 'text-purple-600 bg-purple-50' },
+  { key: 'con_proteina', label: 'Con Proteína', icon: Dumbbell, color: 'text-blue-600 bg-blue-50' },
 ];
 
 const Products = () => {
@@ -53,8 +54,6 @@ const Products = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header cartItemsCount={cartCount} />
-
-      {/* Header */}
       <section className="bg-gradient-to-b from-sorbe-chocolate to-background py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl sm:text-4xl font-black text-white mb-4">Nuestros Productos</h1>
@@ -72,7 +71,6 @@ const Products = () => {
 
       <section className="py-12">
         <div className="container mx-auto px-4 max-w-6xl">
-          {/* Packages */}
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Package className="w-6 h-6 text-sorbe-strawberry" /> Paquetes
           </h2>
@@ -94,10 +92,7 @@ const Products = () => {
             ))}
           </div>
 
-          {/* Sabores catalog */}
           <h2 className="text-2xl font-bold mb-6">{sabores.length} Sabores Disponibles</h2>
-
-          {/* Category filter */}
           <div className="flex gap-2 flex-wrap mb-8">
             <button onClick={() => setActiveCategory(null)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${!activeCategory ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-primary/10'}`}>
@@ -111,7 +106,6 @@ const Products = () => {
             ))}
           </div>
 
-          {/* Flavors grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {filteredSabores.map(s => {
               const cat = flavorCategories.find(c => c.key === s.categoria);
@@ -125,15 +119,8 @@ const Products = () => {
               );
             })}
           </div>
-
-          {filteredSabores.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <p>No se encontraron sabores.</p>
-            </div>
-          )}
         </div>
       </section>
-
       <Footer />
     </div>
   );

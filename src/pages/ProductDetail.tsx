@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, ShoppingCart, Package, Milk, Apple, Flame, Wine, X } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Package, Milk, Apple, Flame, Wine, Dumbbell, X } from 'lucide-react';
 
 type Paquete = {
   id: string; sku: string; nombre: string; descripcion?: string;
@@ -20,6 +20,7 @@ const flavorMeta: Record<string, { label: string; icon: React.ElementType; color
   naturales: { label: 'Naturales', icon: Apple, color: 'text-green-600', bg: 'bg-green-50' },
   chamoyados: { label: 'Chamoyados', icon: Flame, color: 'text-red-600', bg: 'bg-red-50' },
   con_licor: { label: 'Con Licor', icon: Wine, color: 'text-purple-600', bg: 'bg-purple-50' },
+  con_proteina: { label: 'Con Proteína', icon: Dumbbell, color: 'text-blue-600', bg: 'bg-blue-50' },
 };
 
 const ProductDetail = () => {
