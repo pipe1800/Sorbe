@@ -9,6 +9,7 @@ import SizeSelector from '@/components/SelectorTalla';
 import ProductSection from '@/components/ProductSection';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, ShoppingCart, Star, Heart, AlertTriangle } from 'lucide-react';
+import { trackViewContent, trackAddToCart } from '@/integrations/meta/events';
 
 type Product = {
   id: string;
@@ -62,6 +63,7 @@ const ProductDetail = () => {
       const p = data as Product;
       setProduct(p);
       if (p.opciones_talla?.length) setSelectedSize(p.opciones_talla[0]);
+      trackViewContent({ nombre: p.nombre, id: p.id, precio: p.precio });
 
       // Fetch similar products by flavor
       if (p.perfil_sabor?.length) {
@@ -95,6 +97,7 @@ const ProductDetail = () => {
     setCartCount(prev => prev + 1);
     localStorage.setItem('cartItemsCount', String(cartCount + 1));
     toast({ title: 'Agregado al carrito', description: `${product.nombre}${selectedSize ? ` (${selectedSize.nombre})` : ''}` });
+    trackAddToCart({ nombre: product.nombre, id: product.id, precio: currentPrice, quantity: 1 });
   };
 
   const discount = product?.precio_original
