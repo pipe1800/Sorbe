@@ -1,61 +1,73 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import FlavorBadge from '@/components/IndicadorSabor';
-import SeasonalBanner from '@/components/BannerTemporal';
-import { IceCream } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Milk, Apple, Flame, Wine } from 'lucide-react';
 
-const sabores = [
-  { nombre: 'Fresa Natural', categoria: 'Frutal', descripcion: 'Con trozos de fresa fresca' },
-  { nombre: 'Mango Tropical', categoria: 'Frutal', descripcion: 'Mango maduro de temporada' },
-  { nombre: 'Maracuyá', categoria: 'Cítrico', descripcion: 'Intenso y refrescante' },
-  { nombre: 'Coco Cremoso', categoria: 'Cremoso', descripcion: 'Leche de coco artesanal' },
-  { nombre: 'Vainilla Clásica', categoria: 'Cremoso', descripcion: 'Vainilla natural de Madagascar' },
-  { nombre: 'Chocolate Intenso', categoria: 'Chocolate', descripcion: 'Cacao 70% salvadoreño' },
-  { nombre: 'Choco-Menta', categoria: 'Chocolate', descripcion: 'Chocolate con menta fresca' },
-  { nombre: 'Limón Hierbabuena', categoria: 'Herbal', descripcion: 'Cítrico con toque herbal' },
+type Sabor = { id: string; nombre: string; categoria: string; descripcion?: string };
+
+const categories = [
+  { key: 'con_leche', label: 'Sabores con Leche', icon: Milk, color: 'text-amber-700 bg-amber-50 border-amber-200' },
+  { key: 'naturales', label: 'Sabores Naturales', icon: Apple, color: 'text-green-700 bg-green-50 border-green-200' },
+  { key: 'chamoyados', label: 'Sabores Chamoyados', icon: Flame, color: 'text-red-700 bg-red-50 border-red-200' },
+  { key: 'con_licor', label: 'Sabores con Licor', icon: Wine, color: 'text-purple-700 bg-purple-50 border-purple-200' },
 ];
 
 const Sabores = () => {
+  const [sabores, setSabores] = useState<Record<string, Sabor[]>>({});
+
+  useEffect(() => {
+    supabase.from('sabores').select('*').eq('disponible', true).order('sort_order').then(({ data }) => {
+      const grouped: Record<string, Sabor[]> = {};
+      (data || []).forEach((s: any) => {
+        if (!grouped[s.categoria]) grouped[s.categoria] = [];
+        grouped[s.categoria].push(s);
+      });
+      setSabores(grouped);
+    });
+  }, []);
+
+  const total = Object.values(sabores).reduce((s, arr) => s + arr.length, 0);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
       <section className="py-16 bg-gradient-to-b from-sorbe-chocolate to-background text-white">
         <div className="container mx-auto px-4 text-center">
-          <IceCream className="w-12 h-12 mx-auto mb-4 text-sorbe-strawberry" />
-          <h1 className="text-4xl sm:text-5xl font-black mb-4">Nuestros Sabores</h1>
-          <p className="text-xl text-sorbe-cream/70 max-w-2xl mx-auto">
-            Descubre nuestra colección de sabores artesanales, desde los clásicos hasta ediciones limitadas.
-          </p>
+          <h1 className="text-4xl sm:text-5xl font-black mb-2">{total} Sabores</h1>
+          <p className="text-xl text-sorbe-cream/70">Todos nuestros sorbetes están hechos con ingredientes de la más alta calidad</p>
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="mb-12">
-            <SeasonalBanner
-              title="Sabores de Temporada"
-              subtitle="Nuevos sabores cada temporada — ¡pruébalos antes de que se vayan!"
-            />
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sabores.map((sabor) => (
-              <div key={sabor.nombre} className="bg-card rounded-2xl p-6 border border-border hover:border-primary/30 hover:shadow-md transition-all">
-                <div className="mb-3">
-                  <FlavorBadge flavor={sabor.categoria} />
+      <section className="py-12">
+        <div className="container mx-auto px-4 max-w-4xl">
+          {categories.map(cat => {
+            const flavors = sabores[cat.key] || [];
+            if (flavors.length === 0) return null;
+            return (
+              <div key={cat.key} className={`mb-10 ${cat.color} rounded-2xl border p-6`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <cat.icon className="w-7 h-7" />
+                  <h2 className="text-2xl font-bold">{cat.label}</h2>
+                  <span className="text-sm opacity-60 ml-auto">{flavors.length} sabores</span>
                 </div>
-                <h3 className="text-lg font-bold mb-1">{sabor.nombre}</h3>
-                <p className="text-muted-foreground text-sm">{sabor.descripcion}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {flavors.map(s => (
+                    <div key={s.id} className="bg-white/60 rounded-lg px-3 py-2 text-sm font-medium text-center">
+                      {s.nombre}
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
 
-          <div className="text-center mt-12 p-8 bg-muted rounded-2xl">
-            <h3 className="text-xl font-bold mb-2">¿No encuentras tu sabor favorito?</h3>
+          {/* Note */}
+          <div className="text-center mt-8 p-6 bg-muted rounded-2xl">
             <p className="text-muted-foreground">
-              Siempre estamos creando nuevos sabores. Escríbenos por WhatsApp y cuéntanos qué te gustaría probar.
+              Sus pedidos pueden incluir varios sabores. Todos nuestros productos están
+              elaborados con los más altos estándares higiénicos y materiales de alta calidad.
             </p>
           </div>
         </div>

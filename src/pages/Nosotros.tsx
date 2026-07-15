@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { MapPin, Clock, Phone, Heart } from 'lucide-react';
+import { MapPin, Clock, Phone, Heart, Store } from 'lucide-react';
 
 const Nosotros = () => {
   return (
@@ -10,10 +10,10 @@ const Nosotros = () => {
 
       <section className="py-20 bg-gradient-to-b from-sorbe-chocolate to-background text-white">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl sm:text-5xl font-black mb-4">Nuestra Historia</h1>
-          <p className="text-xl text-sorbe-cream/70 max-w-2xl mx-auto">
-            Sorbe nace del amor por los sabores auténticos y la tradición artesanal salvadoreña.
-          </p>
+          <p className="text-sorbe-strawberry font-semibold tracking-wider uppercase mb-2">Desde 2013</p>
+          <h1 className="text-4xl sm:text-5xl font-black mb-4">Sorbe</h1>
+          <p className="text-xl text-sorbe-cream/70">Tu felicidad, nuestra pasión</p>
+          <p className="text-sorbe-mint mt-4">Sorbete Artesanal • Delivery San Salvador</p>
         </div>
       </section>
 
@@ -22,41 +22,58 @@ const Nosotros = () => {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-card rounded-2xl p-8 border border-border">
               <Heart className="w-10 h-10 text-sorbe-strawberry mb-4" />
-              <h2 className="text-2xl font-bold mb-4">Nuestra Misión</h2>
+              <h2 className="text-2xl font-bold mb-4">Nuestra Historia</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Crear momentos de felicidad a través de helados artesanales hechos con ingredientes
-                frescos y naturales. Cada sabor cuenta una historia, cada bocado es una experiencia.
+                Desde 2013, Sorbe ha sido sinónimo de sorbete artesanal de calidad en El Salvador.
+                Elaboramos cada sorbete con los más altos estándares higiénicos y materiales de alta calidad.
+                Nuestros clientes son nuestra prioridad.
               </p>
             </div>
 
             <div className="bg-card rounded-2xl p-8 border border-border">
-              <MapPin className="w-10 h-10 text-sorbe-mint mb-4" />
-              <h2 className="text-2xl font-bold mb-4">Dónde Estamos</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Operamos desde El Salvador con puntos de entrega en San Salvador y área metropolitana.
-                Próximamente expandiendo a más departamentos.
-              </p>
+              <Store className="w-10 h-10 text-sorbe-mint mb-4" />
+              <h2 className="text-2xl font-bold mb-4">Visítanos</h2>
+              <div className="space-y-3 text-muted-foreground">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-5 h-5 text-sorbe-strawberry flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground">Dirección</p>
+                    <p>Avenida Dario Gonzales 731, Barrio San Jacinto</p>
+                    <p className="text-sm">San Salvador</p>
+                    <p className="text-xs mt-1">A 25 mt del costado sur del Mercado San Jacinto</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="bg-card rounded-2xl p-8 border border-border">
               <Clock className="w-10 h-10 text-sorbe-lemon mb-4" />
-              <h2 className="text-2xl font-bold mb-4">Horarios</h2>
-              <div className="space-y-2 text-muted-foreground">
-                <p><span className="font-medium text-foreground">Lunes a Viernes:</span> 10:00 AM - 8:00 PM</p>
-                <p><span className="font-medium text-foreground">Sábado:</span> 10:00 AM - 9:00 PM</p>
-                <p><span className="font-medium text-foreground">Domingo:</span> 11:00 AM - 7:00 PM</p>
-              </div>
+              <h2 className="text-2xl font-bold mb-4">Eventos</h2>
+              <p className="text-muted-foreground leading-relaxed">
+                Atendemos todo tipo de eventos con servicio personalizado.
+                Pregunta por nuestros paquetes especiales para cumpleaños,
+                bodas, eventos corporativos y más.
+              </p>
             </div>
 
             <div className="bg-card rounded-2xl p-8 border border-border">
               <Phone className="w-10 h-10 text-sorbe-raspberry mb-4" />
-              <h2 className="text-2xl font-bold mb-4">Contacto</h2>
+              <h2 className="text-2xl font-bold mb-4">Contáctanos</h2>
               <div className="space-y-2 text-muted-foreground">
                 <p>Pedidos por WhatsApp</p>
-                <a href="https://wa.me/503" target="_blank" rel="noopener noreferrer"
-                  className="text-sorbe-mint hover:underline font-medium text-lg">+503 ---- ----</a>
+                <a href="https://wa.me/50379383084" target="_blank" rel="noopener noreferrer"
+                  className="text-sorbe-mint hover:underline font-medium text-lg">+503 7938 3084</a>
               </div>
             </div>
+          </div>
+
+          {/* Quality note */}
+          <div className="mt-12 bg-primary/5 rounded-2xl p-8 text-center border border-primary/10">
+            <h3 className="text-xl font-bold mb-2">Calidad Garantizada</h3>
+            <p className="text-muted-foreground">
+              Todos nuestros productos están elaborados con los más altos estándares higiénicos
+              y materiales de alta calidad. Tu satisfacción es nuestra prioridad.
+            </p>
           </div>
         </div>
       </section>
