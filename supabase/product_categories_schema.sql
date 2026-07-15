@@ -1,0 +1,4 @@
+-- Legacy reference file retained for historical context.
+-- The `product_categories` join table has been deprecated and the
+-- products table now stores `category_id` and `parent_category_id`
+-- directly. This file intentionally left without executable DDL.
