@@ -21,13 +21,11 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if admin is already logged in
     const adminData = localStorage.getItem('admin_session');
     if (adminData) {
       try {
-        const parsed = JSON.parse(adminData);
-        setAdmin(parsed);
-      } catch (error) {
+        setAdmin(JSON.parse(adminData));
+      } catch {
         localStorage.removeItem('admin_session');
       }
     }
@@ -36,21 +34,37 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      // Call edge function for admin authentication
-      const { data, error } = await supabase.functions.invoke('admin-auth', {
+      // Try edge function first, fall back to direct DB query
+      const { data: edgeData, error: edgeError } = await supabase.functions.invoke('admin-auth', {
         body: { email, password, action: 'login' }
       });
 
-      if (error) throw error;
-
-      if (data.success) {
-        const adminUser = { id: data.admin.id, email: data.admin.email };
+      if (!edgeError && edgeData?.success) {
+        const adminUser = { id: edgeData.admin.id, email: edgeData.admin.email };
         setAdmin(adminUser);
         localStorage.setItem('admin_session', JSON.stringify(adminUser));
         return { success: true };
-      } else {
-        return { success: false, error: data.error };
       }
+
+      // Fallback: direct DB query for local dev
+      const { data: adminRow, error: dbError } = await supabase
+        .from('admin_users')
+        .select('id, email, password_hash')
+        .eq('email', email)
+        .single();
+
+      if (dbError || !adminRow) {
+        return { success: false, error: 'Credenciales inválidas' };
+      }
+
+      if (password !== adminRow.password_hash) {
+        return { success: false, error: 'Credenciales inválidas' };
+      }
+
+      const adminUser = { id: adminRow.id, email: adminRow.email };
+      setAdmin(adminUser);
+      localStorage.setItem('admin_session', JSON.stringify(adminUser));
+      return { success: true };
     } catch (error) {
       console.error('Login error:', error);
       return { success: false, error: 'Error de conexión' };

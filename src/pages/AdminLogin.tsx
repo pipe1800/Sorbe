@@ -34,9 +34,9 @@ const AdminLogin = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-gray-900">
-            Admin Panel
+            Admin Panel — Sorbe
           </CardTitle>
-          <p className="text-gray-600">Cáceres Video Games</p>
+          <p className="text-gray-600">Helados Artesanales</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
