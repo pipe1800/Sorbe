@@ -46,9 +46,9 @@ const Header = ({ cartItemsCount = 0, onCartClick }: HeaderProps) => {
   ];
 
   return (
-    <header className="bg-sorbe-primary text-white shadow-lg">
+    <header className="bg-sorbe-blue text-white shadow-lg">
       {/* Top bar */}
-      <div className="bg-sorbe-blue py-1.5 hidden md:block">
+      <div className="bg-sorbe-primary/90 py-1.5 hidden md:block">
         <div className="container mx-auto px-4 flex justify-between items-center text-xs sm:text-sm">
           <div className="flex items-center gap-4">
             <a href="https://wa.me/503" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-sorbe-light transition-colors">
