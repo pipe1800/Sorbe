@@ -1,1 +1,58 @@
-project_id = "wzwnqtxajmknnnovjtme"
+# Sorbe — Local Supabase Configuration
+# Ports offset to avoid conflict with Jobbi Supabase (default: 54321-54327)
+
+project_id = "sorbe-local"
+
+[api]
+enabled = true
+port = 55321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 55322
+shadow_port = 55330
+major_version = 15
+health_timeout = "2m"
+
+[db.migrations]
+enabled = true
+schema_paths = []
+
+[db.seed]
+enabled = false
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 55323
+api_url = "http://127.0.0.1"
+
+[local_smtp]
+enabled = true
+port = 55324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["https://localhost:5173"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+
+[analytics]
+enabled = false
