@@ -52,14 +52,19 @@ const Index = () => {
 
       {/* ── HERO ── */}
       <section className="relative bg-sorbe-hero text-white py-20 sm:py-28 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-32 h-32 border-2 border-white rounded-full" />
-          <div className="absolute bottom-20 right-20 w-48 h-48 border-2 border-white rounded-full" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-white/20 rounded-full" />
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-32 h-32 border-[4px] border-white/30 rounded-full animate-pulse" />
+          <div className="absolute bottom-20 right-20 w-48 h-48 border-[4px] border-white/25 rounded-full animate-pulse" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border-2 border-white/20 rounded-full" />
+          <div className="absolute top-20 right-10 w-20 h-20 border-[3px] border-white/20 rounded-full animate-bounce" />
+          <IceCream className="absolute top-12 right-1/4 w-28 h-28 text-white/20 rotate-12" />
+          <IceCream className="absolute bottom-16 left-1/4 w-36 h-36 text-white/15 -rotate-12" />
+          <IceCream className="absolute top-32 left-10 w-16 h-16 text-white/15 rotate-45" />
+          <IceCream className="absolute bottom-8 right-1/3 w-24 h-24 text-white/20 -rotate-6" />
         </div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <p className="text-sorbe-strawberry font-semibold tracking-[0.2em] uppercase text-sm mb-6">Desde 2013</p>
-          <img src="/logo-texto.png" alt="Sorbe" className="h-12 sm:h-16 mx-auto mb-4 drop-shadow-xl" />
+          <img src="/logo-texto.png" alt="Sorbe" className="h-16 sm:h-24 mx-auto mb-4 drop-shadow-xl" />
           <p className="text-2xl sm:text-3xl font-light text-sorbe-cream/80 mb-2">Tu felicidad, nuestra pasión</p>
           <div className="flex justify-center gap-3 mt-6">
             <span className="bg-white/10 backdrop-blur-sm text-white/90 text-sm px-5 py-2 rounded-full border border-white/10">Sorbete Artesanal</span>
