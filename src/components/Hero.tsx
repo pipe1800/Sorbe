@@ -12,7 +12,7 @@ const Hero = ({ searchQuery = '', onSearchChange, onSearchSubmit }: HeroProps) =
   const navigate = useNavigate();
 
   return (
-    <section className="relative bg-gradient-to-br from-sorbe-chocolate via-[#3D2618] to-sorbe-chocolate text-white py-16 sm:py-20 overflow-hidden">
+    <section className="relative bg-sorbe-hero text-white py-16 sm:py-20 overflow-hidden">
       {/* Animated bg */}
       <div className="absolute inset-0">
         <div className="absolute top-10 left-10 w-24 h-24 border-2 border-sorbe-strawberry/20 rounded-full animate-pulse" />

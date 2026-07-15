@@ -33,6 +33,7 @@ export default {
 					raspberry: '#C44569',
 					peach: '#FFAB91',
 					lemon: '#FFE082',
+					hero: '#76CFCB',
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',

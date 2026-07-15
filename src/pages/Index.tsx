@@ -51,7 +51,7 @@ const Index = () => {
       <Header cartItemsCount={cartCount} />
 
       {/* ── HERO ── */}
-      <section className="relative bg-gradient-to-br from-sorbe-chocolate via-[#3D2618] to-sorbe-chocolate text-white py-20 sm:py-28 overflow-hidden">
+      <section className="relative bg-sorbe-hero text-white py-20 sm:py-28 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 border-2 border-white rounded-full" />
           <div className="absolute bottom-20 right-20 w-48 h-48 border-2 border-white rounded-full" />
